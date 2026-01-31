@@ -1,57 +1,113 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Users, Eye, Target, Cog, ShieldCheck, HeartHandshake, BrainCircuit, Sparkles, Zap, TrendingUp } from "lucide-react";
+import {
+  Award,
+  Users,
+  Eye,
+  Target,
+  Zap,
+  TrendingUp,
+  Sparkles,
+  Wrench,
+  Factory,
+  ShieldCheck,
+  HeartHandshake,
+  Lightbulb,
+  Leaf,
+  MapPin,
+  CheckCircle2,
+  ArrowRight,
+  Star,
+  Compass,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
-const aboutHeroImage = PlaceHolderImages.find(img => img.id === 'about-hero');
-
-// Hero slider images - using multiple placeholder images for the slider
+const aboutHeroImage = PlaceHolderImages.find((img) => img.id === "about-hero");
 const heroImages = [
-  PlaceHolderImages.find(img => img.id === 'about-hero'),
-  PlaceHolderImages.find(img => img.id === 'hero'),
-  PlaceHolderImages.find(img => img.id === 'services-hero'),
+  PlaceHolderImages.find((img) => img.id === "about-hero"),
+  PlaceHolderImages.find((img) => img.id === "hero-home"),
+  PlaceHolderImages.find((img) => img.id === "service-commercial"),
 ].filter(Boolean);
 
-const coreValues = [
-    {
-      icon: <Cog className="h-10 w-10" />,
-      title: "Tailored Solutions - No One-Size-Fits-All",
-      quote: "Your project, your requirements, your perfect solution.",
-      description: "We reject cookie-cutter approaches in favor of personalized assessments and custom engineering. We provide flexible technology and financing options, with scalable designs that grow with your future needs.",
-    },
-    {
-      icon: <BrainCircuit className="h-10 w-10" />,
-      title: "Proven Expertise - Experience You Can Trust",
-      quote: "We've encountered—and solved—virtually every challenge.",
-      description: "Our team's collective experience spans residential, commercial, industrial, and infrastructure projects across challenging terrains. This diverse experience means we deliver reliable solutions every time.",
-    },
-    {
-      icon: <ShieldCheck className="h-10 w-10" />,
-      title: "Quality Assurance - Excellence Without Compromise",
-      quote: "We build systems that last decades, not just years.",
-      description: "Quality is non-negotiable. We use only Tier-1 internationally certified components, adhere to MNRE standards, and implement rigorous testing to ensure long-term reliability and performance.",
-    },
-    {
-      icon: <HeartHandshake className="h-10 w-10" />,
-      title: "Unmatched Support - Your Success is Our Success",
-      quote: "We're not just vendors—we're your long-term energy partners.",
-      description: "Our relationship evolves post-commissioning. We provide comprehensive training, 24/7 remote monitoring, annual maintenance, and rapid response to ensure your system operates at peak efficiency.",
-    },
-];
+// Replace these with your leadership team photos when ready
+const LEADER_IMAGES = {
+  rizul:
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&h=600&fit=crop",
+  shyam:
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&h=600&fit=crop",
+};
 
 const stats = [
-  { icon: <Award className="h-8 w-8" />, value: "500+", label: "Projects Completed" },
-  { icon: <Users className="h-8 w-8" />, value: "10,000+", label: "Happy Customers" },
-  { icon: <Zap className="h-8 w-8" />, value: "50MW+", label: "Solar Capacity" },
-  { icon: <TrendingUp className="h-8 w-8" />, value: "98%", label: "Customer Satisfaction" },
+  { icon: Award, value: "500+", label: "Projects Completed" },
+  { icon: Users, value: "10,000+", label: "Happy Customers" },
+  { icon: Zap, value: "50MW+", label: "Solar Capacity" },
+  { icon: TrendingUp, value: "98%", label: "Customer Satisfaction" },
+];
+
+const whatSetsUsApart = [
+  {
+    icon: Wrench,
+    title: "Engineering-First Approach",
+    description:
+      "Every system is designed based on real load behaviour, grid conditions, and long-term performance—not assumptions.",
+  },
+  {
+    icon: Factory,
+    title: "MSME-Focused Solutions",
+    description:
+      "We understand cash flows, operating hours, and business realities of Indian MSMEs.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Execution with Integrity",
+    description:
+      "No inflated projections. No silent compromises. Only what can be engineered and delivered.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Long-Term Commitment",
+    description:
+      "We stay engaged beyond commissioning, ensuring systems perform as promised over their lifecycle.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Proven Ground Reality",
+    description: "Our projects speak louder than presentations.",
+  },
+];
+
+const leadership = [
+  {
+    name: "Rizul Choudhury",
+    role: "Founder and CEO",
+    image: LEADER_IMAGES.rizul,
+    bio: "Over 18 years of leadership experience across energy, technology, and large-scale consumer businesses. He holds an MBA, along with a B.Sc. in Information Technology and Software Engineering, combining strategic thinking with strong technical and systems understanding. His professional journey includes leadership roles with globally respected organisations such as Samsung, Reliance Retail, Huawei Telecommunications, Future Group, Surya Business, Anvil Energy, and Husk Power Systems. Rizul has worked extensively on rural clean-energy transition and energy-access initiatives across Bihar, Uttar Pradesh, Assam, the North East, and West Bengal, focusing on MSMEs, agro-based industries, and underserved communities. A strong advocate for climate action and inclusive growth, he has led initiatives aligned with the UN Sustainable Development Goals, particularly SDG 7 (Affordable & Clean Energy) and SDG 13 (Climate Action).",
+  },
+  {
+    name: "Shyam Chakraborty",
+    role: "Co-Founder and COO",
+    image: LEADER_IMAGES.shyam,
+    bio: "Over 14 years of deep, hands-on experience in rooftop and utility-scale solar projects. He leads operations, project management, engineering, and execution, ensuring every project is delivered with precision, safety, and long-term reliability. His expertise covers techno-commercial evaluation, project costing, system design (grid-connected and battery-based), risk management, and end-to-end project delivery—from site surveys and engineering validation to commissioning and O&M handover. An alumnus of XLRI Jamshedpur's Executive Program in Project Management, Shyam has worked with industry leaders including Areva T&D, Schneider Electric, Atha Group, Onergy Solar, Husk Power, and Anvil Cables & Energy. Known for his structured problem-solving approach and adherence to Total Quality Management (TQM) principles.",
+  },
 ];
 
 export default function AboutPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [statsCount, setStatsCount] = useState([0, 0, 0, 0]);
+  
+  const introReveal = useScrollReveal(0.06);
+  const purposeReveal = useScrollReveal(0.06);
+  const engineeringReveal = useScrollReveal(0.06);
+  const setsApartReveal = useScrollReveal(0.06);
+  const futureReveal = useScrollReveal(0.06);
+  const leadershipReveal = useScrollReveal(0.06);
+  const statsReveal = useScrollReveal(0.06);
 
   useEffect(() => {
     setIsVisible(true);
@@ -61,11 +117,45 @@ export default function AboutPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // Animated counter for stats
+  useEffect(() => {
+    if (statsReveal.isInView) {
+      const targets = [500, 10000, 50, 98];
+      const duration = 2000;
+      const steps = 60;
+      const stepDuration = duration / steps;
+
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / steps;
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        
+        setStatsCount(targets.map(target => Math.floor(target * easeOutQuart)));
+        
+        if (currentStep >= steps) {
+          clearInterval(interval);
+          setStatsCount(targets);
+        }
+      }, stepDuration);
+
+      return () => clearInterval(interval);
+    }
+  }, [statsReveal.isInView]);
+
   return (
     <>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
         :root {
           --color-sunrise: #FF6B35;
           --color-amber: #FFB627;
@@ -75,168 +165,268 @@ export default function AboutPage() {
           --color-deep-orange: #F4511E;
           --color-soft-peach: #FFE0B2;
         }
-
-        .font-display {
-          font-family: 'Playfair Display', serif;
-        }
-
-        .font-body {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
+        
+        .font-display { font-family: 'Playfair Display', serif; }
+        .font-body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
+        
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translateY(-30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-50px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
         @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(50px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-
+        
         @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
         }
-
+        
         @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
         }
-
+        
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.4), 0 0 40px rgba(255, 107, 53, 0.2); }
+          50% { box-shadow: 0 0 30px rgba(255, 107, 53, 0.6), 0 0 60px rgba(255, 107, 53, 0.3); }
+        }
+        
         @keyframes shimmer {
-          0% {
-            background-position: -1000px 0;
-          }
-          100% {
-            background-position: 1000px 0;
-          }
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
         }
-
-        @keyframes glow {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
-          }
-          50% {
-            box-shadow: 0 0 40px rgba(255, 107, 53, 0.6);
-          }
+        
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
-
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-out forwards;
+        
+        @keyframes ripple {
+          0% { transform: scale(0.8); opacity: 1; }
+          100% { transform: scale(2.4); opacity: 0; }
         }
-
-        .animate-slideInRight {
-          animation: slideInRight 0.8s ease-out forwards;
-        }
-
-        .animate-scaleIn {
-          animation: scaleIn 0.6s ease-out forwards;
-        }
-
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        .animate-glow {
-          animation: glow 2s ease-in-out infinite;
-        }
-
+        
         .hero-gradient {
-          background: linear-gradient(135deg, 
-            rgba(255, 107, 53, 0.95) 0%, 
-            rgba(255, 166, 38, 0.9) 50%, 
-            rgba(244, 81, 30, 0.85) 100%
-          );
+          background: linear-gradient(135deg,
+            rgba(255, 107, 53, 0.35) 0%,
+            rgba(255, 166, 38, 0.3) 50%,
+            rgba(244, 81, 30, 0.28) 100%);
         }
-
+        
         .text-gradient {
-          background: linear-gradient(135deg, var(--color-sunrise), var(--color-amber));
+          background: linear-gradient(135deg, var(--color-sunrise), var(--color-amber), var(--color-honey));
+          background-size: 200% 200%;
+          animation: gradient-shift 3s ease infinite;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
-
+        
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        
         .card-hover {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card-hover:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(255, 107, 53, 0.2);
-        }
-
-        .shimmer-effect {
           position: relative;
           overflow: hidden;
         }
-
-        .shimmer-effect::before {
+        
+        .card-hover::before {
           content: '';
           position: absolute;
           top: 0;
           left: -100%;
           width: 100%;
           height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s;
+        }
+        
+        .card-hover:hover::before {
+          left: 100%;
+        }
+        
+        .card-hover:hover {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 25px 50px rgba(255, 107, 53, 0.25), 0 10px 20px rgba(255, 107, 53, 0.15);
+        }
+        
+        .glass-morphism {
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hero-slide {
+          transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        }
+        
+        .hero-slide.active {
+          opacity: 1;
+          transform: scale(1);
+        }
+        
+        .hero-slide.inactive {
+          opacity: 0;
+          transform: scale(1.05);
+        }
+        
+        .parallax-element {
+          transition: transform 0.3s ease-out;
+        }
+        
+        .stat-card {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .stat-card::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          transform: translate(-50%, -50%);
+          transition: width 0.6s, height 0.6s;
+        }
+        
+        .stat-card:hover::after {
+          width: 300px;
+          height: 300px;
+        }
+        
+        .gradient-border {
+          position: relative;
+          background: linear-gradient(white, white) padding-box,
+                      linear-gradient(135deg, var(--color-sunrise), var(--color-amber)) border-box;
+          border: 2px solid transparent;
+        }
+        
+        .shine-effect {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .shine-effect::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
           background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
+            45deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 70%
           );
           animation: shimmer 3s infinite;
         }
-
-        .glass-morphism {
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+        
+        .floating-icon {
+          animation: float 3s ease-in-out infinite;
         }
-
-        .hero-slide {
-          transition: opacity 1s ease-in-out;
+        
+        .pulse-ring {
+          animation: ripple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+        
+        .section-divider {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .section-divider::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, var(--color-sunrise), transparent);
+          animation: slide-right 2s ease-in-out infinite;
+        }
+        
+        @keyframes slide-right {
+          0% { left: -100%; }
+          100% { left: 100%; }
+        }
+        
+        .team-card-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+        
+        .team-card:hover .team-card-overlay {
+          opacity: 1;
+        }
+        
+        .stagger-animation > * {
+          opacity: 0;
+          animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+        .stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+        
+        .bg-pattern {
+          background-image: 
+            radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255, 182, 39, 0.05) 0%, transparent 50%);
+        }
+        
+        .rotate-slow {
+          animation: rotate 20s linear infinite;
         }
       `}</style>
 
-      <div className="flex flex-col bg-gradient-to-b from-[var(--color-warm-white)] to-white font-body">
-        {/* Enhanced Hero Section with Image Slider */}
-        <section className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
-          {/* Image Slider */}
+      <div className="flex flex-col bg-gradient-to-b from-[var(--color-warm-white)] to-white font-display overflow-hidden">
+        {/* Floating Background Elements */}
+        <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-[var(--color-sunrise)] rounded-full blur-3xl opacity-20 floating-icon" style={{ animationDelay: '0s' }} />
+          <div className="absolute top-40 right-20 w-96 h-96 bg-[var(--color-amber)] rounded-full blur-3xl opacity-15 floating-icon" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-40 left-1/3 w-64 h-64 bg-[var(--color-honey)] rounded-full blur-3xl opacity-20 floating-icon" style={{ animationDelay: '2s' }} />
+        </div>
+
+        {/* Hero */}
+        <section className="relative h-[62vh] min-h-[480px] w-full overflow-hidden">
           <div className="absolute inset-0">
             {heroImages.map((img, index) => (
               <div
                 key={index}
                 className={`absolute inset-0 hero-slide ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  index === currentSlide ? "active" : "inactive"
                 }`}
               >
                 {img && (
                   <Image
                     src={img.imageUrl}
                     alt={img.description}
-                    data-ai-hint={img.imageHint}
                     fill
                     className="object-cover"
                     priority={index === 0}
@@ -245,67 +435,59 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 hero-gradient" />
-
-          {/* Floating Particles Effect */}
-          <div className="absolute inset-0">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 bg-white rounded-full opacity-30"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
-                  animationDelay: `${Math.random() * 2}s`,
-                }}
-              />
-            ))}
+          <div className="absolute inset-0 hero-gradient backdrop-blur-[2px]" />
+          
+          {/* Animated Geometric Shapes */}
+          <div className="absolute inset-0 overflow-hidden opacity-10">
+            <div className="absolute top-10 left-10 w-32 h-32 border-4 border-white rotate-slow" />
+            <div className="absolute bottom-20 right-20 w-40 h-40 border-4 border-white rounded-full" style={{ animation: 'rotate 15s linear infinite reverse' }} />
+            <div className="absolute top-1/2 left-1/4 w-24 h-24 border-4 border-white" style={{ animation: 'float 4s ease-in-out infinite' }} />
           </div>
 
-          {/* Content */}
-          <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
+          <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white px-4">
             <div
-              className={`transition-all duration-1000 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              className={`transition-all duration-1200 ${
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
               }`}
             >
-              <div className="inline-block mb-6">
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-6 py-2 border border-white/30">
-                  <Sparkles className="h-5 w-5" />
-                  <span className="text-sm font-semibold tracking-wide">DRIVING INDIA'S GREEN REVOLUTION</span>
-                </div>
+              <div className="inline-flex items-center gap-2 glass-morphism rounded-full px-4 py-2 mb-4 shine-effect">
+                <Sparkles className="h-4 w-4 floating-icon" />
+                <span className="text-xs sm:text-sm font-bold tracking-wider">
+                  NEXT-GEN ENERGY TECHNOLOGY & SOLAR EPC
+                </span>
               </div>
               
-              <h1 className="text-5xl font-display font-black md:text-7xl drop-shadow-2xl mb-6 leading-tight">
-                About RaQuadrant<br />
-                <span className="text-[var(--color-amber)]">Energy</span>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black drop-shadow-2xl mb-3 leading-tight">
+                About <span className="text-[var(--color-amber)] inline-block" style={{ animation: 'scaleIn 0.6s ease forwards' }}>RaQuadrant</span>
+                <br />
+                <span className="text-gradient inline-block" style={{ animation: 'fadeInUp 0.6s ease 0.3s forwards', opacity: 0 }}>Energy</span>
               </h1>
               
-              <p className="mt-6 max-w-3xl text-xl md:text-2xl font-light leading-relaxed">
-                Illuminating India's Future, One Solar Panel at a Time
-              </p>
+              <div className="max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg md:text-xl font-light leading-relaxed mb-1" style={{ animation: 'fadeInUp 0.6s ease 0.5s forwards', opacity: 0 }}>
+                  Engineering Trust. Delivering Performance.
+                </p>
+                <p className="text-lg sm:text-xl md:text-2xl font-semibold" style={{ animation: 'fadeInUp 0.6s ease 0.7s forwards', opacity: 0 }}>
+                  Powering India&apos;s Industrial Future.
+                </p>
+              </div>
 
-              {/* Slider Indicators */}
-              <div className="flex gap-2 mt-12 justify-center">
+              <div className="flex gap-2 mt-8 justify-center">
                 {heroImages.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'w-12 bg-white'
-                        : 'w-2 bg-white/50 hover:bg-white/80'
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      index === currentSlide 
+                        ? "w-12 bg-white shadow-lg" 
+                        : "w-2 bg-white/50 hover:bg-white/80 hover:w-8"
                     }`}
                     aria-label={`Go to slide ${index + 1}`}
                   />
                 ))}
               </div>
             </div>
-
-            {/* Scroll Indicator */}
+            
             <div className="absolute bottom-8 animate-bounce">
               <div className="w-6 h-10 border-2 border-white rounded-full flex items-start justify-center p-2">
                 <div className="w-1 h-3 bg-white rounded-full animate-pulse" />
@@ -314,157 +496,477 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-16 bg-gradient-to-r from-[var(--color-sunrise)] to-[var(--color-honey)] -mt-20 relative z-20">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        {/* Stats */}
+        <section 
+          ref={statsReveal.ref}
+          className="py-10 sm:py-12 bg-gradient-to-r from-[var(--color-deep-orange)] via-[var(--color-sunrise)] to-[var(--color-honey)] -mt-16 relative z-20 overflow-hidden"
+        >
+          {/* Animated Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)',
+              animation: 'slide-right 20s linear infinite'
+            }} />
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto">
               {stats.map((stat, index) => (
-                <div
-                  key={index}
-                  className="text-center text-white animate-fadeInUp"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                <div 
+                  key={index} 
+                  className="text-center text-white stat-card group"
+                  style={{ animation: statsReveal.isInView ? `scaleIn 0.6s ease ${index * 0.1}s forwards` : 'none', opacity: statsReveal.isInView ? 1 : 0 }}
                 >
-                  <div className="flex justify-center mb-4 animate-float" style={{ animationDelay: `${index * 0.3}s` }}>
-                    {stat.icon}
+                  <div className="relative inline-block mb-2">
+                    <div className="absolute inset-0 bg-white/20 rounded-full blur-xl pulse-ring" />
+                    <div className="relative bg-white/10 p-3 rounded-full backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform duration-300">
+                      <stat.icon className="h-6 w-6 sm:h-8 sm:w-8" />
+                    </div>
                   </div>
-                  <div className="text-4xl md:text-5xl font-display font-bold mb-2">{stat.value}</div>
-                  <div className="text-sm md:text-base font-medium opacity-90">{stat.label}</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-display font-black mb-1">
+                    {index === 0 && `${statsCount[0]}+`}
+                    {index === 1 && `${statsCount[1].toLocaleString()}+`}
+                    {index === 2 && `${statsCount[2]}MW+`}
+                    {index === 3 && `${statsCount[3]}%`}
+                  </div>
+                  <div className="text-xs sm:text-sm font-semibold opacity-95 tracking-wide">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Our Story */}
-        <section className="py-20 lg:py-32 bg-white relative overflow-hidden">
-          {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-soft-peach)] rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--color-amber)] rounded-full blur-3xl opacity-10 translate-y-1/2 -translate-x-1/2" />
+        {/* About RaQuadrant Energy - Intro */}
+        <section
+          ref={introReveal.ref}
+          className="py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden bg-pattern"
+        >
+          <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-[var(--color-soft-peach)] to-transparent rounded-full blur-3xl opacity-30" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div
+                className={`transition-all duration-1000 ${
+                  introReveal.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-0.5 w-12 bg-gradient-to-r from-[var(--color-sunrise)] to-[var(--color-amber)] rounded-full" />
+                  <span className="text-[var(--color-sunrise)] font-bold text-xs tracking-widest uppercase">
+                    Who We Are
+                  </span>
+                </div>
+                
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-gray-900 mb-4">
+                  RaQuadrant <span className="text-gradient">Energy</span>
+                </h2>
+                
+                <div className="space-y-4 text-gray-700 leading-relaxed text-base sm:text-lg">
+                  <p className="relative pl-5 border-l-4 border-[var(--color-sunrise)]">
+                    RaQuadrant Energy is a next-generation Energy Technology and Solar EPC company committed to reshaping how India&apos;s industries access, manage, and consume power. We work at the intersection of engineering excellence, on-ground execution, and MSME-centric innovation, delivering solar solutions that are built not just to install—but to perform reliably for decades.
+                  </p>
+                  
+                  <div className="bg-gradient-to-br from-[var(--color-cream)] to-white p-5 sm:p-6 rounded-2xl shadow-xl border-2 border-[var(--color-soft-peach)]">
+                    <p className="text-gray-800 font-medium text-sm sm:text-base">
+                      In a market crowded with short-term installers and price-driven promises, RaQuadrant stands for something different: <strong className="text-[var(--color-sunrise)]">precision, accountability, and long-term value creation.</strong>
+                    </p>
+                  </div>
+                  
+                  <p className="text-sm sm:text-base">
+                    Our work spans factories, agro-based industries, warehouses, healthcare facilities, and commercial enterprises—particularly in regions where grid reliability is weak, operating margins are tight, and energy decisions directly impact livelihoods.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Purpose & Vision */}
+        <section
+          ref={purposeReveal.ref}
+          className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[var(--color-sunrise)] via-[var(--color-honey)] to-[var(--color-deep-orange)] relative overflow-hidden"
+        >
+          <div className="absolute inset-0 opacity-10" style={{ 
+            backgroundImage: "radial-gradient(circle at 3px 3px, white 2px, transparent 0)", 
+            backgroundSize: "48px 48px" 
+          }} />
+          
+          <div className="absolute top-8 left-8 opacity-20">
+            <Star className="h-12 w-12 text-white floating-icon" />
+          </div>
+          <div className="absolute bottom-8 right-8 opacity-20">
+            <Compass className="h-14 w-14 text-white rotate-slow" />
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div
+                className={`transition-all duration-1000 ${
+                  purposeReveal.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-0.5 w-12 bg-white rounded-full" />
+                  <span className="text-white font-bold text-xs tracking-widest uppercase">
+                    Our Purpose
+                  </span>
+                </div>
+                
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white mb-5">
+                  One Guiding Principle
+                </h2>
+                
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-5 sm:p-6 md:p-8 border-2 border-white/20 shadow-2xl mb-6">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      <Target className="h-6 w-6 text-white" />
+                    </div>
+                    <blockquote className="text-base sm:text-lg md:text-xl text-white font-display font-semibold leading-relaxed flex-1">
+                      &ldquo;To deliver high-quality, reliable, and innovative solar solutions that customers can trust—executed with precision, transparency, and long-term commitment.&rdquo;
+                    </blockquote>
+                  </div>
+                  <p className="text-white/90 text-sm sm:text-base pl-12">
+                    This philosophy defines every decision we make—from engineering design and component selection to execution standards and post-commissioning support.
+                  </p>
+                </div>
+                
+                <div className="glass-morphism rounded-2xl p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      <Eye className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-xs font-bold tracking-widest uppercase text-white/90">Vision</span>
+                  </div>
+                  <p className="text-base sm:text-lg md:text-xl font-display font-bold text-white leading-relaxed">
+                    &ldquo;To redefine India&apos;s solar ecosystem with bold ideas, relentless execution, and solutions that inspire trust and transform lives.&rdquo;
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Engineering Where Others Hesitate */}
+        <section
+          ref={engineeringReveal.ref}
+          className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white via-[var(--color-warm-white)] to-white relative overflow-hidden"
+        >
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-[var(--color-amber)] to-transparent rounded-full blur-3xl opacity-20" />
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-5xl mx-auto">
-              <div className="text-center mb-12 animate-fadeInUp">
-                <div className="inline-block mb-4">
-                  <span className="text-[var(--color-sunrise)] font-bold text-sm tracking-widest uppercase">Our Journey</span>
+              <div
+                className={`transition-all duration-1000 ${
+                  engineeringReveal.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-[var(--color-sunrise)] to-transparent rounded-full" />
+                    <span className="text-[var(--color-sunrise)] font-bold text-xs tracking-widest uppercase">
+                      Proven Capability
+                    </span>
+                    <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-[var(--color-sunrise)] to-transparent rounded-full" />
+                  </div>
+                  
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-gray-900 mb-4">
+                    Engineering Where Others <span className="text-gradient">Hesitate</span>
+                  </h2>
+                  
+                  <p className="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto">
+                    RaQuadrant Energy is recognised for delivering complex, high-stake solar projects where conventional EPC approaches fall short.
+                  </p>
                 </div>
-                <h2 className="text-4xl font-display font-bold text-gray-900 md:text-6xl mb-6">
-                  The Story <span className="text-gradient">Begins</span>
-                </h2>
-              </div>
-              
-              <div className="bg-gradient-to-br from-[var(--color-cream)] to-white rounded-3xl p-8 md:p-12 shadow-2xl animate-scaleIn border-2 border-[var(--color-soft-peach)]">
-                <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                  RaQuadrant Energy was born from a vision to make clean, affordable solar energy accessible to every home, business, and community. Founded by passionate engineers, we've grown into a trusted name in renewable energy across Eastern India. Operating extensively in <span className="font-bold text-[var(--color-sunrise)]">Uttar Pradesh, Bihar, Jharkhand, Odisha, West Bengal, and Assam</span>, our journey is defined by bold innovation, relentless execution, and a genuine focus on community impact. We are proud to be one of the fastest-growing solar EPC companies in the region, illuminating lives through sustainable energy.
-                </p>
+                
+                <div className="grid md:grid-cols-2 gap-5 sm:gap-6">
+                  <div className="gradient-border rounded-2xl p-5 sm:p-6 card-hover bg-white">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="bg-gradient-to-br from-[var(--color-sunrise)] to-[var(--color-amber)] p-2 rounded-lg shadow-lg">
+                        <MapPin className="h-5 w-5 text-white" />
+                      </div>
+                      <h3 className="font-display font-black text-gray-900 text-base sm:text-lg">
+                        Chapar, Dhubri <span className="text-[var(--color-sunrise)]">(Assam)</span>
+                      </h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+                      We successfully engineered and commissioned a <strong className="text-[var(--color-sunrise)]">150 kWp gridless, battery-less captive solar power plant</strong>—a first-of-its-kind solution for a rural MSME operating without grid access. This project has been widely appreciated for proving that reliable industrial operations are possible even without grid dependency, through disciplined engineering and system design.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-[var(--color-sunrise)] font-semibold text-sm">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>First-of-its-kind solution</span>
+                    </div>
+                  </div>
+                  
+                  <div className="gradient-border rounded-2xl p-5 sm:p-6 card-hover bg-white">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="bg-gradient-to-br from-[var(--color-honey)] to-[var(--color-deep-orange)] p-2 rounded-lg shadow-lg">
+                        <MapPin className="h-5 w-5 text-white" />
+                      </div>
+                      <h3 className="font-display font-black text-gray-900 text-base sm:text-lg">
+                        Howrah, <span className="text-[var(--color-sunrise)]">West Bengal</span>
+                      </h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+                      We executed a <strong className="text-[var(--color-sunrise)]">138 kWp rooftop solar system</strong> on a non-penetrative dome structure, serving three separate meters with distinct load profiles, operational functions, and long cable distances—while addressing voltage-drop challenges and high-demand conditions. The project stands as a benchmark in precision rooftop engineering.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-[var(--color-sunrise)] font-semibold text-sm">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Precision engineering benchmark</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 text-center">
+                  <div className="inline-block bg-gradient-to-r from-[var(--color-cream)] to-[var(--color-soft-peach)] rounded-xl p-4 shadow-xl">
+                    <p className="text-gray-700 text-sm sm:text-base font-medium max-w-2xl">
+                      These installations are not just capacity numbers. They are <strong className="text-[var(--color-sunrise)]">testaments to RaQuadrant&apos;s problem-solving capability</strong>, attention to detail, and refusal to compromise on quality—even under technical and commercial pressure.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
-        
-        {/* Vision & Mission */}
-        <section className="py-20 lg:py-32 bg-gradient-to-br from-[var(--color-sunrise)] via-[var(--color-honey)] to-[var(--color-deep-orange)] relative overflow-hidden">
-          {/* Animated Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-              backgroundSize: '40px 40px'
-            }} />
-          </div>
 
+        {/* What Sets Us Apart */}
+        <section
+          ref={setsApartReveal.ref}
+          className="py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden"
+        >
           <div className="container mx-auto px-4 relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              <div className="glass-morphism rounded-3xl p-8 md:p-12 text-white card-hover animate-fadeInUp">
-                <div className="bg-white/20 rounded-full w-20 h-20 flex items-center justify-center mb-6 animate-glow">
-                  <Eye className="h-12 w-12" />
+            <div className="max-w-5xl mx-auto">
+              <div
+                className={`transition-all duration-1000 ${
+                  setsApartReveal.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <Sparkles className="h-5 w-5 text-[var(--color-sunrise)]" />
+                    <span className="text-[var(--color-sunrise)] font-bold text-xs tracking-widest uppercase">
+                      Our Difference
+                    </span>
+                    <Sparkles className="h-5 w-5 text-[var(--color-sunrise)]" />
+                  </div>
+                  
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-gray-900">
+                    What Sets Us <span className="text-gradient">Apart</span>
+                  </h2>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">Our Vision</h2>
-                <p className="text-lg leading-relaxed font-light">
-                  "To redefine India's solar ecosystem with bold ideas, relentless execution, and solutions that inspire trust and transform lives."
-                </p>
-              </div>
-              
-              <div className="glass-morphism rounded-3xl p-8 md:p-12 text-white card-hover animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                <div className="bg-white/20 rounded-full w-20 h-20 flex items-center justify-center mb-6 animate-glow" style={{ animationDelay: '1s' }}>
-                  <Target className="h-12 w-12" />
+                
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                  {whatSetsUsApart.map((item, index) => (
+                    <div
+                      key={index}
+                      className="group relative bg-gradient-to-br from-[var(--color-cream)] via-white to-[var(--color-soft-peach)] rounded-xl p-5 sm:p-6 border-2 border-[var(--color-soft-peach)] card-hover"
+                      style={{ 
+                        animation: setsApartReveal.isInView ? `scaleIn 0.6s ease ${index * 0.1}s forwards` : 'none',
+                        opacity: setsApartReveal.isInView ? 1 : 0 
+                      }}
+                    >
+                      <div className="relative z-10">
+                        <div className="bg-gradient-to-br from-[var(--color-sunrise)] to-[var(--color-amber)] p-3 rounded-lg w-fit mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          <item.icon className="h-6 w-6 text-white" />
+                        </div>
+                        
+                        <h3 className="font-display font-black text-gray-900 text-base sm:text-lg mb-2">
+                          {item.title}
+                        </h3>
+                        
+                        <p className="text-gray-600 leading-relaxed text-xs sm:text-sm">
+                          {item.description}
+                        </p>
+                      </div>
+                      
+                      <div className="absolute top-0 right-0 w-14 h-14 bg-gradient-to-br from-[var(--color-sunrise)]/10 to-transparent rounded-bl-full" />
+                    </div>
+                  ))}
                 </div>
-                <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">Our Mission</h2>
-                <p className="text-lg leading-relaxed font-light">
-                  "To deliver high-quality, reliable, and innovative solar solutions that customers can trust—executed with precision, transparency, and long-term commitment."
-                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Core Values Section */}
-        <section className="py-20 lg:py-32 bg-gradient-to-b from-white to-[var(--color-warm-white)] relative overflow-hidden">
-          {/* Decorative Elements */}
-          <div className="absolute top-20 left-10 w-20 h-20 border-4 border-[var(--color-amber)] rounded-full opacity-20 animate-float" />
-          <div className="absolute bottom-20 right-10 w-32 h-32 border-4 border-[var(--color-sunrise)] rounded-full opacity-20 animate-float" style={{ animationDelay: '1s' }} />
+        {/* Building the Future */}
+        <section
+          ref={futureReveal.ref}
+          className="py-14 sm:py-20 lg:py-24 bg-gradient-to-b from-[var(--color-cream)] via-[var(--color-warm-white)] to-white relative overflow-hidden"
+        >
+          <div className="absolute top-16 right-10 w-28 h-28 border-2 border-[var(--color-amber)] rounded-full opacity-20 floating-icon" />
+          <div className="absolute bottom-16 left-10 w-32 h-32 border-2 border-[var(--color-sunrise)] opacity-20" style={{ animation: 'float 5s ease-in-out infinite' }} />
           
           <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center mb-16 animate-fadeInUp">
-              <div className="inline-block mb-4">
-                <span className="text-[var(--color-sunrise)] font-bold text-sm tracking-widest uppercase">What Drives Us</span>
-              </div>
-              <h2 className="text-4xl font-display font-bold text-gray-900 md:text-6xl mb-4">
-                Our Core <span className="text-gradient">Values</span>
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">The RaQuadrant Pillars</p>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-7xl mx-auto">
-              {coreValues.map((value, index) => (
-                <Card 
-                  key={value.title} 
-                  className="bg-white border-0 shadow-xl hover:shadow-2xl rounded-2xl overflow-hidden card-hover animate-scaleIn group"
-                  style={{ animationDelay: `${index * 0.15}s` }}
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[var(--color-sunrise)] to-[var(--color-amber)] opacity-5 rounded-bl-full transition-all duration-500 group-hover:opacity-20" />
+            <div className="max-w-4xl mx-auto text-center">
+              <div
+                className={`transition-all duration-1000 ${
+                  futureReveal.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="flex justify-center gap-4 mb-6">
+                  <div className="bg-gradient-to-br from-[var(--color-sunrise)] to-[var(--color-amber)] p-4 rounded-full shadow-xl floating-icon">
+                    <Lightbulb className="h-11 w-11 text-white" />
+                  </div>
+                  <div className="bg-gradient-to-br from-[var(--color-amber)] to-[var(--color-honey)] p-4 rounded-full shadow-xl floating-icon" style={{ animationDelay: '0.5s' }}>
+                    <Leaf className="h-11 w-11 text-white" />
+                  </div>
+                </div>
+                
+                <span className="text-[var(--color-sunrise)] font-bold text-sm tracking-widest uppercase">
+                  Our Commitment
+                </span>
+                
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-gray-900 mt-3 mb-6">
+                  Building the Future of <span className="text-gradient">Clean Energy</span>
+                </h2>
+                
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border-2 border-[var(--color-soft-peach)] mb-6">
+                  <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-5">
+                    Aligned with <strong className="text-[var(--color-sunrise)]">SDG 7 (Affordable & Clean Energy)</strong> and <strong className="text-[var(--color-sunrise)]">SDG 13 (Climate Action)</strong>, RaQuadrant Energy believes that the energy transition will succeed only when reliability meets responsibility—and when clean energy works equally well for urban industries and rural enterprises.
+                  </p>
                   
-                  <CardHeader className="relative">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 bg-gradient-to-br from-[var(--color-sunrise)] to-[var(--color-honey)] text-white p-4 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        {value.icon}
-                      </div>
-                      <CardTitle className="text-2xl font-display font-bold text-gray-900 leading-tight pt-2">
-                        {value.title}
-                      </CardTitle>
+                  <div className="inline-block bg-gradient-to-r from-[var(--color-sunrise)] to-[var(--color-amber)] p-[2px] rounded-xl">
+                    <div className="bg-white rounded-xl px-6 py-5">
+                      <p className="text-gray-800 text-base sm:text-lg font-bold leading-relaxed">
+                        We are not here to chase volumes.<br />
+                        <span className="text-gradient">We are here to build trust, resilience, and performance—one project at a time.</span>
+                      </p>
                     </div>
-                  </CardHeader>
-                  
-                  <CardContent className="flex flex-col">
-                    <blockquote className="border-l-4 border-[var(--color-sunrise)] pl-6 my-6 text-lg font-semibold italic text-gray-700 shimmer-effect">
-                      "{value.quote}"
-                    </blockquote>
-                    <p className="text-gray-600 leading-relaxed">{value.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-sunrise)] via-[var(--color-amber)] to-[var(--color-honey)] blur-2xl opacity-30" />
+                  <h3 className="relative text-xl sm:text-2xl md:text-3xl font-display font-black text-gradient leading-relaxed">
+                    Engineering Trust. Delivering Performance.<br />
+                    Powering India&apos;s Industrial Future.
+                  </h3>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Call to Action */}
-        <section className="py-20 bg-gradient-to-r from-[var(--color-deep-orange)] via-[var(--color-sunrise)] to-[var(--color-honey)] relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `linear-gradient(45deg, transparent 48%, white 49%, white 51%, transparent 52%)`,
-              backgroundSize: '20px 20px'
-            }} />
-          </div>
-
+        {/* Leadership Team */}
+        <section
+          ref={leadershipReveal.ref}
+          className="py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden"
+        >
           <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-4xl mx-auto text-center text-white animate-fadeInUp">
-              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
-                Ready to Go Solar?
+            <div className="max-w-5xl mx-auto">
+              <div
+                className={`transition-all duration-1000 ${
+                  leadershipReveal.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <Users className="h-5 w-5 text-[var(--color-sunrise)]" />
+                    <span className="text-[var(--color-sunrise)] font-bold text-xs tracking-widest uppercase">
+                      The People Behind RaQuadrant
+                    </span>
+                    <Users className="h-5 w-5 text-[var(--color-sunrise)]" />
+                  </div>
+                  
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-gray-900">
+                    Leadership <span className="text-gradient">Team</span>
+                  </h2>
+                </div>
+                
+                <div className="space-y-6 sm:space-y-8">
+                  {leadership.map((person, index) => (
+                    <div
+                      key={person.name}
+                      className={`group team-card relative bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-100 card-hover flex flex-col md:flex-row ${
+                        index % 2 === 1 ? "md:flex-row-reverse" : ""
+                      }`}
+                      style={{ 
+                        animation: leadershipReveal.isInView ? `fadeInUp 0.7s ease ${index * 0.15}s forwards` : "none",
+                        opacity: leadershipReveal.isInView ? 1 : 0 
+                      }}
+                    >
+                      {/* Image - horizontal half */}
+                      <div className="relative w-full md:w-2/5 md:min-w-[280px] md:max-w-[340px] aspect-[4/5] md:aspect-auto md:min-h-[280px] bg-gradient-to-br from-gray-200 to-gray-100 overflow-hidden flex-shrink-0">
+                        <Image
+                          src={person.image}
+                          alt={person.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, 340px"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 md:hidden" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent md:hidden">
+                          <h3 className="font-display font-black text-white text-lg">{person.name}</h3>
+                          <p className="text-[var(--color-amber)] font-bold text-sm">{person.role}</p>
+                        </div>
+                        {/* Accent corner */}
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-[var(--color-sunrise)]/20 to-transparent rounded-bl-full" />
+                      </div>
+                      
+                      {/* Content - horizontal half */}
+                      <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 md:py-8">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="h-1 w-10 bg-gradient-to-r from-[var(--color-sunrise)] to-[var(--color-amber)] rounded-full flex-shrink-0" />
+                          <span className="text-[var(--color-sunrise)] font-bold text-xs tracking-widest uppercase hidden md:inline">
+                            Leadership
+                          </span>
+                        </div>
+                        <h3 className="font-display font-black text-gray-900 text-xl sm:text-2xl mb-1">
+                          {person.name}
+                        </h3>
+                        <p className="text-[var(--color-sunrise)] font-bold text-sm sm:text-base mb-4">
+                          {person.role}
+                        </p>
+                        <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                          {person.bio}
+                        </p>
+                      </div>
+                      
+                      {/* Hover border */}
+                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-[var(--color-sunrise)]/30 rounded-2xl transition-all duration-300 pointer-events-none" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-[var(--color-deep-orange)] via-[var(--color-sunrise)] to-[var(--color-honey)] relative overflow-hidden">
+          <div className="absolute inset-0 opacity-15" style={{ 
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(255,255,255,0.1) 15px, rgba(255,255,255,0.1) 30px)',
+          }} />
+          
+          <div className="absolute top-8 left-8 w-24 h-24 bg-white/10 rounded-full blur-2xl floating-icon" />
+          <div className="absolute bottom-8 right-8 w-28 h-28 bg-white/10 rounded-full blur-2xl floating-icon" style={{ animationDelay: '1s' }} />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-3xl mx-auto text-center text-white">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 mb-5">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-xs font-bold tracking-wider">LET'S GET STARTED</span>
+              </div>
+              
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-black mb-4 leading-tight">
+                Ready to Go <span className="text-[var(--color-amber)]">Solar</span>?
               </h2>
-              <p className="text-xl md:text-2xl mb-10 font-light">
-                Join thousands of satisfied customers who've made the switch to clean energy
+              
+              <p className="text-base sm:text-lg font-light mb-6 max-w-xl mx-auto">
+                Join thousands of satisfied customers who&apos;ve made the switch to clean, reliable energy.
               </p>
-              <button className="bg-white text-[var(--color-sunrise)] px-10 py-4 rounded-full text-lg font-bold hover:bg-opacity-90 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 animate-glow">
-                Get Started Today
-              </button>
+              
+              <Link
+                href="/contact"
+                className="group inline-flex items-center gap-2 bg-white text-[var(--color-sunrise)] px-7 py-3.5 rounded-full text-base font-black hover:bg-white/95 transition-all duration-300 shadow-xl hover:scale-105"
+              >
+                Get in Touch
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              
+              <p className="mt-5 text-white/80 text-xs">
+                Free consultation • Custom solutions • Expert support
+              </p>
             </div>
           </div>
         </section>

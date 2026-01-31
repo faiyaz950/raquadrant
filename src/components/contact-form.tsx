@@ -1,14 +1,14 @@
 "use client";
 
 import { useFormState, useFormStatus } from "react-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { handleContactForm, type FormState } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, User, Mail, Phone, MessageSquare, Sparkles, CheckCircle2, Send } from "lucide-react";
 
 const initialState: FormState = {
   message: "",
@@ -17,16 +17,28 @@ const initialState: FormState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full sm:w-auto font-bold" disabled={pending}>
+    <Button 
+      type="submit" 
+      className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 px-8 py-7 font-headline text-base font-bold text-white shadow-2xl shadow-orange-500/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/60 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+      disabled={pending}
+    >
+      {/* Animated background overlay */}
+      <span className="absolute inset-0 bg-gradient-to-r from-orange-400 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
+      {/* Shimmer effect */}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+      
       {pending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Sending...
-        </>
+        <span className="relative z-10 flex items-center justify-center gap-3">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-base">Sending your message...</span>
+        </span>
       ) : (
-        <>
-          Submit Inquiry <ArrowRight className="ml-2 h-5 w-5" />
-        </>
+        <span className="relative z-10 flex items-center justify-center gap-3">
+          <Send className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+          <span className="text-base">Send Message</span>
+          <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+        </span>
       )}
     </Button>
   );
@@ -36,14 +48,15 @@ export function ContactForm() {
   const [state, formAction] = useFormState(handleContactForm, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.message) {
       if (state.errors) {
-        // Errors are displayed below fields, no toast needed for validation errors.
+        // Errors are displayed below fields
       } else {
         toast({
-          title: "Success",
+          title: "Success! 🎉",
           description: state.message,
         });
         formRef.current?.reset();
@@ -52,38 +65,239 @@ export function ContactForm() {
   }, [state, toast]);
   
   return (
-    <form ref={formRef} action={formAction} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
-        <Input id="name" name="name" placeholder="John Doe" required defaultValue={state.fields?.name} />
-        {state.errors?.name && <p className="text-sm text-destructive">{state.errors.name[0]}</p>}
-      </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" name="email" type="email" placeholder="john.doe@example.com" required defaultValue={state.fields?.email} />
-          {state.errors?.email && <p className="text-sm text-destructive">{state.errors.email[0]}</p>}
+    <form ref={formRef} action={formAction} className="space-y-7">
+      {/* Full Name Field */}
+      <div className="group relative space-y-3">
+        <Label 
+          htmlFor="name" 
+          className="flex items-center gap-2 font-headline text-sm font-semibold text-gray-700"
+        >
+          <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+            focusedField === 'name' 
+              ? 'bg-orange-500 text-white scale-110' 
+              : 'bg-orange-100 text-orange-600'
+          }`}>
+            <User className="h-3.5 w-3.5" />
+          </div>
+          Full Name <span className="text-red-500">*</span>
+        </Label>
+        <div className="relative">
+          <Input 
+            id="name" 
+            name="name" 
+            placeholder="Enter your full name" 
+            required 
+            defaultValue={state.fields?.name} 
+            onFocus={() => setFocusedField('name')}
+            onBlur={() => setFocusedField(null)}
+            className="h-14 rounded-xl border-2 border-orange-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-400/20 hover:border-orange-300"
+          />
+          <User className={`absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transition-all duration-300 ${
+            focusedField === 'name' ? 'text-orange-500' : 'text-gray-400'
+          }`} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number (Optional)</Label>
-          <Input id="phone" name="phone" type="tel" placeholder="+91 123-456-7890" defaultValue={state.fields?.phone} />
-           {state.errors?.phone && <p className="text-sm text-destructive">{state.errors.phone[0]}</p>}
+        {state.errors?.name && (
+          <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
+            {state.errors.name[0]}
+          </p>
+        )}
+      </div>
+
+      {/* Email and Phone Grid */}
+      <div className="grid grid-cols-1 gap-7 sm:grid-cols-2">
+        {/* Email Field */}
+        <div className="group relative space-y-3">
+          <Label 
+            htmlFor="email" 
+            className="flex items-center gap-2 font-headline text-sm font-semibold text-gray-700"
+          >
+            <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+              focusedField === 'email' 
+                ? 'bg-amber-500 text-white scale-110' 
+                : 'bg-amber-100 text-amber-600'
+            }`}>
+              <Mail className="h-3.5 w-3.5" />
+            </div>
+            Email Address <span className="text-red-500">*</span>
+          </Label>
+          <div className="relative">
+            <Input 
+              id="email" 
+              name="email" 
+              type="email" 
+              placeholder="your.email@example.com" 
+              required 
+              defaultValue={state.fields?.email}
+              onFocus={() => setFocusedField('email')}
+              onBlur={() => setFocusedField(null)}
+              className="h-14 rounded-xl border-2 border-amber-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-400/20 hover:border-amber-300"
+            />
+            <Mail className={`absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transition-all duration-300 ${
+              focusedField === 'email' ? 'text-amber-500' : 'text-gray-400'
+            }`} />
+          </div>
+          {state.errors?.email && (
+            <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
+              {state.errors.email[0]}
+            </p>
+          )}
+        </div>
+
+        {/* Phone Field */}
+        <div className="group relative space-y-3">
+          <Label 
+            htmlFor="phone" 
+            className="flex items-center gap-2 font-headline text-sm font-semibold text-gray-700"
+          >
+            <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+              focusedField === 'phone' 
+                ? 'bg-yellow-500 text-white scale-110' 
+                : 'bg-yellow-100 text-yellow-600'
+            }`}>
+              <Phone className="h-3.5 w-3.5" />
+            </div>
+            Phone Number
+            <span className="text-xs text-gray-500 font-normal">(Optional)</span>
+          </Label>
+          <div className="relative">
+            <Input 
+              id="phone" 
+              name="phone" 
+              type="tel" 
+              placeholder="+91 12345-67890" 
+              defaultValue={state.fields?.phone}
+              onFocus={() => setFocusedField('phone')}
+              onBlur={() => setFocusedField(null)}
+              className="h-14 rounded-xl border-2 border-yellow-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-yellow-400 focus:bg-white focus:ring-4 focus:ring-yellow-400/20 hover:border-yellow-300"
+            />
+            <Phone className={`absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transition-all duration-300 ${
+              focusedField === 'phone' ? 'text-yellow-500' : 'text-gray-400'
+            }`} />
+          </div>
+          {state.errors?.phone && (
+            <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
+              {state.errors.phone[0]}
+            </p>
+          )}
         </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="subject">Subject</Label>
-        <Input id="subject" name="subject" placeholder="Inquiry about Rooftop Solar" required defaultValue={state.fields?.subject} />
-        {state.errors?.subject && <p className="text-sm text-destructive">{state.errors.subject[0]}</p>}
+
+      {/* Subject Field */}
+      <div className="group relative space-y-3">
+        <Label 
+          htmlFor="subject" 
+          className="flex items-center gap-2 font-headline text-sm font-semibold text-gray-700"
+        >
+          <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+            focusedField === 'subject' 
+              ? 'bg-orange-500 text-white scale-110' 
+              : 'bg-orange-100 text-orange-600'
+          }`}>
+            <Sparkles className="h-3.5 w-3.5" />
+          </div>
+          Subject <span className="text-red-500">*</span>
+        </Label>
+        <div className="relative">
+          <Input 
+            id="subject" 
+            name="subject" 
+            placeholder="What can we help you with?" 
+            required 
+            defaultValue={state.fields?.subject}
+            onFocus={() => setFocusedField('subject')}
+            onBlur={() => setFocusedField(null)}
+            className="h-14 rounded-xl border-2 border-orange-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-400/20 hover:border-orange-300"
+          />
+          <Sparkles className={`absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transition-all duration-300 ${
+            focusedField === 'subject' ? 'text-orange-500' : 'text-gray-400'
+          }`} />
+        </div>
+        {state.errors?.subject && (
+          <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
+            {state.errors.subject[0]}
+          </p>
+        )}
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="message">Message</Label>
-        <Textarea id="message" name="message" placeholder="I'm interested in learning more about your solar solutions..." className="min-h-[120px]" required defaultValue={state.fields?.message} />
-        {state.errors?.message && <p className="text-sm text-destructive">{state.errors.message[0]}</p>}
+
+      {/* Message Field */}
+      <div className="group relative space-y-3">
+        <Label 
+          htmlFor="message" 
+          className="flex items-center gap-2 font-headline text-sm font-semibold text-gray-700"
+        >
+          <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+            focusedField === 'message' 
+              ? 'bg-amber-500 text-white scale-110' 
+              : 'bg-amber-100 text-amber-600'
+          }`}>
+            <MessageSquare className="h-3.5 w-3.5" />
+          </div>
+          Your Message <span className="text-red-500">*</span>
+        </Label>
+        <div className="relative">
+          <Textarea 
+            id="message" 
+            name="message" 
+            placeholder="Tell us more about your solar energy needs, project requirements, or any questions you have..." 
+            className="min-h-[160px] rounded-xl border-2 border-amber-200/60 bg-white/80 p-4 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-400/20 hover:border-amber-300 resize-none"
+            required 
+            defaultValue={state.fields?.message}
+            onFocus={() => setFocusedField('message')}
+            onBlur={() => setFocusedField(null)}
+          />
+          <MessageSquare className={`absolute left-4 top-4 h-5 w-5 transition-all duration-300 ${
+            focusedField === 'message' ? 'text-amber-500' : 'text-gray-400'
+          }`} />
+        </div>
+        {state.errors?.message && (
+          <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
+            {state.errors.message[0]}
+          </p>
+        )}
       </div>
-      <div>
+
+      {/* Privacy Notice */}
+      <div className="rounded-xl border-2 border-orange-100 bg-gradient-to-br from-orange-50/50 to-amber-50/50 p-4">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-orange-500 mt-0.5" />
+          <p className="text-sm text-gray-600 leading-relaxed">
+            <span className="font-semibold text-gray-700">We respect your privacy.</span> Your information is secure and will only be used to respond to your inquiry. We typically respond within 2-4 hours during business hours.
+          </p>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="pt-2">
         <SubmitButton />
       </div>
-       {state.errors && <p className="text-sm text-destructive mt-4">{state.message}</p>}
+
+      {/* Error Message */}
+      {state.errors && state.message && (
+        <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 animate-shake">
+          <div className="flex items-start gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">!</span>
+            <p className="text-sm font-medium text-red-600">{state.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Animations CSS */}
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
     </form>
   );
 }

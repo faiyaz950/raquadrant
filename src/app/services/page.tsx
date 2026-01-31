@@ -141,11 +141,19 @@ const executionProcess = [
   },
 ];
 
+const HERO_SLIDER_IMAGES = [
+  "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1920&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=1920&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1559302504-64aae6ca6b6d?w=1920&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1920&auto=format&fit=crop",
+];
+
 export default function ServicesPage() {
   const [expandedScope, setExpandedScope] = useState(0);
   const [hoveredService, setHoveredService] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
@@ -154,6 +162,13 @@ export default function ServicesPage() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroSlideIndex((prev) => (prev + 1) % HERO_SLIDER_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
   
   return (
@@ -291,15 +306,42 @@ export default function ServicesPage() {
 
       {/* Hero Section - Ultra Premium */}
       <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
+        {/* Background Image Slider - Solar related */}
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1920&auto=format&fit=crop" 
-            alt="Solar panels background"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-900/80 via-amber-900/70 to-yellow-900/60"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-orange-50/20 to-white"></div>
+          {HERO_SLIDER_IMAGES.map((src, i) => (
+            <div
+              key={src}
+              className={`absolute inset-0 transition-opacity duration-300 ease-out ${
+                i === heroSlideIndex ? "opacity-100 z-[1]" : "opacity-0 z-0"
+              }`}
+              aria-hidden={i !== heroSlideIndex}
+            >
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-cover"
+                fetchPriority={i === 0 ? "high" : "low"}
+              />
+            </div>
+          ))}
+          <div className="absolute inset-0 z-[2] bg-gradient-to-br from-orange-900/50 via-amber-900/45 to-yellow-900/40"></div>
+          <div className="absolute inset-0 z-[2] bg-gradient-to-b from-transparent via-orange-50/10 to-white/80"></div>
+        </div>
+        {/* Slider dots */}
+        <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+          {HERO_SLIDER_IMAGES.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Slide ${i + 1}`}
+              onClick={() => setHeroSlideIndex(i)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === heroSlideIndex
+                  ? "w-8 bg-white shadow-lg"
+                  : "w-2 bg-white/50 hover:bg-white/70"
+              }`}
+            />
+          ))}
         </div>
         
         {/* Animated Gradient Background */}
