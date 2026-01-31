@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirebaseClient } from '@/lib/firebase';
@@ -15,11 +15,17 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/admin';
-  const fb = getFirebaseClient();
-  const firebaseNotConfigured = !fb?.auth;
+  // Only check Firebase after client mount (server has no window, so getFirebaseClient() is null and button would stay disabled)
+  const fb = mounted ? getFirebaseClient() : null;
+  const firebaseNotConfigured = mounted && !fb?.auth;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

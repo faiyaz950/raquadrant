@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getCollection, addDocument, updateDocument, removeDocument, toFirestore, COLLECTIONS } from '@/lib/firestore';
 import type { HeroSlide, IntroPoint, Testimonial, Partner, FeaturedProject } from '@/lib/firestore-types';
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Upload, X } from 'lucide-react';
 import { getFirebaseClient } from '@/lib/firebase';
+import { uploadHeroSlideImage, validateImageFile } from '@/lib/storage';
+import Image from 'next/image';
 
 type TabKey = 'hero' | 'intro' | 'testimonials' | 'partners' | 'projects';
 
@@ -285,9 +287,15 @@ function HomeEditDialog({
 }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Record<string, string | number>>({});
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!dialog.open) return;
+    setUploadError(null);
+    setUploadProgress(0);
     const item = dialog.item as Record<string, unknown> | undefined;
     if (item) {
       const f: Record<string, string | number> = {};
@@ -304,6 +312,35 @@ function HomeEditDialog({
       if (dialog.tab === 'projects') setForm({ image: '', title: '', location: '', capacity: '', type: '', order: 0 });
     }
   }, [dialog.open, dialog.tab, dialog.item]);
+
+  async function handleHeroImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setUploadError(null);
+    setUploadProgress(0);
+    const err = validateImageFile(file);
+    if (err) {
+      setUploadError(err);
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadHeroSlideImage(file, (percent) => setUploadProgress(percent));
+      setForm((f) => ({ ...f, image: url }));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  }
+
+  function handleRemoveHeroImage() {
+    setForm((f) => ({ ...f, image: '' }));
+    setUploadError(null);
+    fileInputRef.current?.value && (fileInputRef.current.value = '');
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -352,7 +389,49 @@ function HomeEditDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           {dialog.tab === 'hero' && (
             <>
-              <div><Label className="text-slate-300">Image URL</Label><Input className="mt-1 bg-slate-700 border-slate-600" value={form.image || ''} onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))} /></div>
+              <div className="space-y-2">
+                <Label className="text-slate-300">Slide image (PNG, WebP, JPG, JPEG)</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".png,.webp,.jpg,.jpeg,image/png,image/webp,image/jpeg"
+                  className="hidden"
+                  onChange={handleHeroImageSelect}
+                  disabled={uploading}
+                />
+                {form.image ? (
+                  <div className="relative rounded-lg border border-slate-600 overflow-hidden bg-slate-700/50">
+                    <div className="relative aspect-video w-full max-h-48">
+                      <Image src={String(form.image)} alt="Slide preview" fill className="object-cover" sizes="400px" unoptimized />
+                    </div>
+                    <div className="flex items-center justify-between p-2 border-t border-slate-600">
+                      <span className="text-xs text-slate-400 truncate max-w-[200px]">{String(form.image).slice(0, 50)}…</span>
+                      <Button type="button" variant="ghost" size="sm" className="text-red-400 hover:text-red-300 shrink-0" onClick={handleRemoveHeroImage} disabled={uploading}>
+                        <X className="h-4 w-4 mr-1" /> Remove image
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full border-slate-600 bg-slate-700/50 text-slate-300 hover:bg-slate-700"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                      {uploading ? `Uploading… ${uploadProgress}%` : 'Choose image'}
+                    </Button>
+                    {uploading && (
+                      <div className="h-1.5 w-full rounded-full bg-slate-700 overflow-hidden">
+                        <div className="h-full bg-orange-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {uploadError && <p className="text-sm text-red-400">{uploadError}</p>}
+              </div>
               <div><Label className="text-slate-300">Title</Label><Input className="mt-1 bg-slate-700 border-slate-600" value={form.title || ''} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} /></div>
               <div><Label className="text-slate-300">Subtitle</Label><Input className="mt-1 bg-slate-700 border-slate-600" value={form.subtitle || ''} onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))} /></div>
               <div><Label className="text-slate-300">Description</Label><Input className="mt-1 bg-slate-700 border-slate-600" value={form.description || ''} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} /></div>
