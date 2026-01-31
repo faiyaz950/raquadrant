@@ -5,146 +5,45 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Award, Building2, CheckSquare, BrainCircuit, Globe, Handshake, HomeIcon, Lightbulb, Droplets, ShieldCheck, Users, Zap, Sun, Leaf, Battery, TrendingUp, Star, ChevronRight, ChevronLeft, Play, Sparkles, CircleDot, Quote } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useHeroSlides, useIntroPoints, useTestimonials, usePartners, useFeaturedProjects } from '@/hooks/use-site-content';
+import { getIcon } from '@/lib/icon-map';
 
 const heroImage = PlaceHolderImages.find(img => img.id === 'hero-home');
 const aboutImage = PlaceHolderImages.find(img => img.id === 'about-home');
 
-const heroSlides = [
-  {
-    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1920&auto=format&fit=crop",
-    title: "Pioneering Solar EPC Solutions",
-    subtitle: "for a Sustainable Future",
-    description: "Revolutionizing energy access across India with cutting-edge solar technology"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1920&auto=format&fit=crop",
-    title: "Commercial Solar Excellence",
-    subtitle: "Power Your Business Sustainably",
-    description: "High-capacity systems delivering exceptional ROI and tax benefits"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=1920&auto=format&fit=crop",
-    title: "Clean Energy for Every Home",
-    subtitle: "Transform Your Lifestyle",
-    description: "Slash electricity bills by up to 90% while protecting the planet"
-  }
+const FALLBACK_HERO = [
+  { image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1920&auto=format&fit=crop", title: "Pioneering Solar EPC Solutions", subtitle: "for a Sustainable Future", description: "Revolutionizing energy access across India with cutting-edge solar technology" },
+  { image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1920&auto=format&fit=crop", title: "Commercial Solar Excellence", subtitle: "Power Your Business Sustainably", description: "High-capacity systems delivering exceptional ROI and tax benefits" },
+  { image: "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=1920&auto=format&fit=crop", title: "Clean Energy for Every Home", subtitle: "Transform Your Lifestyle", description: "Slash electricity bills by up to 90% while protecting the planet" },
 ];
 
-const introPoints = [
-    {
-      icon: <Zap className="h-8 w-8 sm:h-9 sm:w-9" />,
-      title: "Innovation That Inspires",
-      description: "Cutting-edge solar technology and engineering excellence that maximizes energy output.",
-      paragraph: "We invest in the latest inverters, monitoring systems, and panel technologies so your plant performs at peak efficiency for decades. Our engineering team designs each system for your site and usage pattern.",
-      image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&auto=format&fit=crop",
-    },
-    {
-      icon: <Handshake className="h-8 w-8 sm:h-9 sm:w-9" />,
-      title: "Trust Through Transparency",
-      description: "Crystal-clear communication from consultation to commissioning. No surprises.",
-      paragraph: "You get fixed quotes, clear timelines, and regular updates. We share design reports, component choices, and warranties in plain language. Our goal is to build long-term relationships, not one-time deals.",
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop",
-    },
-    {
-      icon: <Globe className="h-8 w-8 sm:h-9 sm:w-9" />,
-      title: "Impact That Matters",
-      description: "Contributing to climate action and a healthier planet through reduced emissions.",
-      paragraph: "Every kilowatt we install displaces fossil fuel and cuts carbon. We help you track and report your green impact. Together we are building a cleaner, more resilient energy future for India.",
-      image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&auto=format&fit=crop",
-    },
-    {
-        icon: <BrainCircuit className="h-8 w-8 sm:h-9 sm:w-9" />,
-        title: "Expertise That Delivers",
-        description: "Unmatched technical knowledge from residential rooftops to industrial installations.",
-        paragraph: "From 3 kW homes to multi-megawatt plants and off-grid pumps, our team has done it all. We handle permits, grid approval, and commissioning so you get a turnkey solution without the technical headache.",
-        image: "https://images.unsplash.com/photo-1559302504-64aae6ca6b6d?w=600&auto=format&fit=crop",
-    },
-    {
-      icon: <ShieldCheck className="h-8 w-8 sm:h-9 sm:w-9" />,
-      title: "Quality That Lasts",
-      description: "Tier-1 components and rigorous quality control for decades-long performance.",
-      paragraph: "We use only certified panels, inverters, and mounting systems. Every installation is tested and documented. Our warranties and performance guarantees give you peace of mind for 25+ years.",
-      image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop",
-    },
-    {
-      icon: <Users className="h-8 w-8 sm:h-9 sm:w-9" />,
-      title: "Support Beyond Commissioning",
-      description: "Dedicated O&M, monitoring, and after-sales support for the life of your plant.",
-      paragraph: "From day-one handover to annual maintenance and fault resolution, we stay with you. Real-time monitoring, preventive visits, and a single point of contact for any issue.",
-      image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&auto=format&fit=crop",
-    },
+const FALLBACK_INTRO = [
+  { icon: <Zap className="h-8 w-8 sm:h-9 sm:w-9" />, title: "Innovation That Inspires", description: "Cutting-edge solar technology and engineering excellence that maximizes energy output.", paragraph: "We invest in the latest inverters, monitoring systems, and panel technologies so your plant performs at peak efficiency for decades. Our engineering team designs each system for your site and usage pattern.", image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&auto=format&fit=crop" },
+  { icon: <Handshake className="h-8 w-8 sm:h-9 sm:w-9" />, title: "Trust Through Transparency", description: "Crystal-clear communication from consultation to commissioning. No surprises.", paragraph: "You get fixed quotes, clear timelines, and regular updates. We share design reports, component choices, and warranties in plain language. Our goal is to build long-term relationships, not one-time deals.", image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop" },
+  { icon: <Globe className="h-8 w-8 sm:h-9 sm:w-9" />, title: "Impact That Matters", description: "Contributing to climate action and a healthier planet through reduced emissions.", paragraph: "Every kilowatt we install displaces fossil fuel and cuts carbon. We help you track and report your green impact. Together we are building a cleaner, more resilient energy future for India.", image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&auto=format&fit=crop" },
+  { icon: <BrainCircuit className="h-8 w-8 sm:h-9 sm:w-9" />, title: "Expertise That Delivers", description: "Unmatched technical knowledge from residential rooftops to industrial installations.", paragraph: "From 3 kW homes to multi-megawatt plants and off-grid pumps, our team has done it all. We handle permits, grid approval, and commissioning so you get a turnkey solution without the technical headache.", image: "https://images.unsplash.com/photo-1559302504-64aae6ca6b6d?w=600&auto=format&fit=crop" },
+  { icon: <ShieldCheck className="h-8 w-8 sm:h-9 sm:w-9" />, title: "Quality That Lasts", description: "Tier-1 components and rigorous quality control for decades-long performance.", paragraph: "We use only certified panels, inverters, and mounting systems. Every installation is tested and documented. Our warranties and performance guarantees give you peace of mind for 25+ years.", image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop" },
+  { icon: <Users className="h-8 w-8 sm:h-9 sm:w-9" />, title: "Support Beyond Commissioning", description: "Dedicated O&M, monitoring, and after-sales support for the life of your plant.", paragraph: "From day-one handover to annual maintenance and fault resolution, we stay with you. Real-time monitoring, preventive visits, and a single point of contact for any issue.", image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&auto=format&fit=crop" },
 ];
 
-const testimonials = [
-  {
-    quote: "RaQuadrant delivered our 150 kWp off-grid solar plant in Assam on time. Their engineering and execution were outstanding. We now run our unit entirely on solar with zero dependency on the grid.",
-    name: "Rajesh Kumar",
-    role: "Director, Agro-Processing Unit",
-    location: "Chapar, Dhubri (Assam)",
-    rating: 5,
-  },
-  {
-    quote: "From site survey to commissioning, the team was professional and transparent. Our rooftop system in Howrah has been performing beyond expectations. Highly recommend for commercial installations.",
-    name: "Priya Sharma",
-    role: "Operations Head",
-    location: "Howrah, West Bengal",
-    rating: 5,
-  },
-  {
-    quote: "We needed a reliable solar solution for our warehouse. RaQuadrant understood our load profile and designed a system that has cut our electricity costs significantly. Trustworthy and quality-focused.",
-    name: "Amit Patel",
-    role: "Managing Partner",
-    location: "Kolkata",
-    rating: 5,
-  },
+const FALLBACK_TESTIMONIALS = [
+  { quote: "RaQuadrant delivered our 150 kWp off-grid solar plant in Assam on time. Their engineering and execution were outstanding. We now run our unit entirely on solar with zero dependency on the grid.", name: "Rajesh Kumar", role: "Director, Agro-Processing Unit", location: "Chapar, Dhubri (Assam)", rating: 5 },
+  { quote: "From site survey to commissioning, the team was professional and transparent. Our rooftop system in Howrah has been performing beyond expectations. Highly recommend for commercial installations.", name: "Priya Sharma", role: "Operations Head", location: "Howrah, West Bengal", rating: 5 },
+  { quote: "We needed a reliable solar solution for our warehouse. RaQuadrant understood our load profile and designed a system that has cut our electricity costs significantly. Trustworthy and quality-focused.", name: "Amit Patel", role: "Managing Partner", location: "Kolkata", rating: 5 },
 ];
 
-const partners = [
-    {
-      icon: <Award className="h-6 w-6 sm:h-7 sm:w-7" />,
-      title: "Proven Expertise & Track Record",
-      description: "500+ successful installations, 50MW+ capacity, 99.8% uptime, zero project failures.",
-    },
-    {
-      icon: <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7" />,
-      title: "Uncompromising Quality",
-      description: "Tier-1 certified components and rigorous quality control for decades-long performance.",
-    },
-    {
-      icon: <Users className="h-6 w-6 sm:h-7 sm:w-7" />,
-      title: "Client-Centric Approach",
-      description: "Transparent communication, timely delivery, and dedicated long-term support.",
-    },
-    {
-      icon: <CheckSquare className="h-6 w-6 sm:h-7 sm:w-7" />,
-      title: "End-to-End Solutions",
-      description: "Complete responsibility from concept to commissioning and beyond.",
-    },
+const FALLBACK_PARTNERS = [
+  { icon: <Award className="h-6 w-6 sm:h-7 sm:w-7" />, title: "Proven Expertise & Track Record", description: "500+ successful installations, 50MW+ capacity, 99.8% uptime, zero project failures." },
+  { icon: <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7" />, title: "Uncompromising Quality", description: "Tier-1 certified components and rigorous quality control for decades-long performance." },
+  { icon: <Users className="h-6 w-6 sm:h-7 sm:w-7" />, title: "Client-Centric Approach", description: "Transparent communication, timely delivery, and dedicated long-term support." },
+  { icon: <CheckSquare className="h-6 w-6 sm:h-7 sm:w-7" />, title: "End-to-End Solutions", description: "Complete responsibility from concept to commissioning and beyond." },
 ];
 
-const featuredProjects = [
-  {
-    image: "https://images.unsplash.com/photo-1559302504-64aae6ca6b6d?w=800&auto=format&fit=crop",
-    title: "Industrial Rooftop",
-    location: "Ranchi, Jharkhand",
-    capacity: "500kW",
-    type: "Commercial"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&auto=format&fit=crop",
-    title: "Agricultural Pump",
-    location: "West Bengal",
-    capacity: "10HP",
-    type: "Infrastructure"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&auto=format&fit=crop",
-    title: "Grid-Tied System",
-    location: "Guwahati, Assam",
-    capacity: "25kW",
-    type: "Residential"
-  }
+const FALLBACK_PROJECTS = [
+  { image: "https://images.unsplash.com/photo-1559302504-64aae6ca6b6d?w=800&auto=format&fit=crop", title: "Industrial Rooftop", location: "Ranchi, Jharkhand", capacity: "500kW", type: "Commercial" },
+  { image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&auto=format&fit=crop", title: "Agricultural Pump", location: "West Bengal", capacity: "10HP", type: "Infrastructure" },
+  { image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&auto=format&fit=crop", title: "Grid-Tied System", location: "Guwahati, Assam", capacity: "25kW", type: "Residential" },
 ];
 
 function useScrollReveal(threshold = 0.1) {
@@ -166,6 +65,28 @@ function useScrollReveal(threshold = 0.1) {
 }
 
 export default function HomePage() {
+  const heroFromDb = useHeroSlides();
+  const introFromDb = useIntroPoints();
+  const testimonialsFromDb = useTestimonials();
+  const partnersFromDb = usePartners();
+  const projectsFromDb = useFeaturedProjects();
+
+  const heroSlides = useMemo(() => (heroFromDb.data?.length ? heroFromDb.data : FALLBACK_HERO), [heroFromDb.data]);
+  const introPoints = useMemo(() => {
+    if (introFromDb.data?.length) {
+      return introFromDb.data.map((p) => ({ ...p, icon: getIcon(p.iconName, 'h-8 w-8 sm:h-9 sm:w-9') }));
+    }
+    return FALLBACK_INTRO;
+  }, [introFromDb.data]);
+  const testimonials = useMemo(() => (testimonialsFromDb.data?.length ? testimonialsFromDb.data : FALLBACK_TESTIMONIALS), [testimonialsFromDb.data]);
+  const partners = useMemo(() => {
+    if (partnersFromDb.data?.length) {
+      return partnersFromDb.data.map((p) => ({ ...p, icon: getIcon(p.iconName, 'h-6 w-6 sm:h-7 sm:w-7') }));
+    }
+    return FALLBACK_PARTNERS;
+  }, [partnersFromDb.data]);
+  const featuredProjects = useMemo(() => (projectsFromDb.data?.length ? projectsFromDb.data : FALLBACK_PROJECTS), [projectsFromDb.data]);
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const introScrollRef = useRef<HTMLDivElement>(null);
@@ -178,11 +99,12 @@ export default function HomePage() {
 
   useEffect(() => {
     setIsVisible(true);
+    const len = heroSlides.length || 1;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % len);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     const el = introScrollRef.current;

@@ -1,144 +1,30 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CheckCircle2, FileText, HardHat, LayoutPanelTop, ShieldCheck, Truck, Sun, Zap, TrendingUp, Award, ArrowRight, Sparkles, Clock, Star, Users, BarChart3, Shield, Leaf, Battery } from 'lucide-react';
+import { useServices, useScopeOfWork, useExecutionProcess } from '@/hooks/use-site-content';
+import { getIcon } from '@/lib/icon-map';
 
-const services = [
-  {
-    id: "residential",
-    title: "Residential Rooftop Solar",
-    description: "Transform your home into a clean energy powerhouse. Slash bills by up to 90%.",
-    features: [
-      "Custom-engineered designs",
-      "Premium Tier-1 panels with 25+ year warranty",
-      "Smart monitoring & full subsidy assistance"
-    ],
-    stats: ["90% Bill Cut", "25+ Years", "Full Subsidy", "3-5 Year ROI"],
-    capacity: "1kW to 10kW",
-    roi: "20-25% returns",
-    gradient: "from-orange-400 via-amber-400 to-yellow-400",
-    icon: <Sun className="h-6 w-6" />,
-    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&auto=format&fit=crop"
-  },
-  {
-    id: "commercial",
-    title: "Commercial & Industrial Solar",
-    description: "Power your business sustainably. High-capacity systems with exceptional ROI and tax benefits.",
-    features: [
-      "10kW to 1MW+ systems for all businesses",
-      "Flexible OPEX/CAPEX financing models",
-      "Performance guarantees & tax benefits"
-    ],
-    stats: ["70-100% Offset", "3-4 Year ROI", "Tax Benefits", "Zero Downtime"],
-    capacity: "10kW to 1MW+",
-    roi: "25-30% returns",
-    gradient: "from-yellow-400 via-orange-400 to-amber-500",
-    icon: <BarChart3 className="h-6 w-6" />,
-    image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&auto=format&fit=crop"
-  },
-  {
-    id: "infrastructure",
-    title: "Solar Pumps & Street Lights",
-    description: "Off-grid solutions for agriculture and public safety with up to 90% subsidy support.",
-    features: [
-      "Solar pumps (1-25 HP) for farming",
-      "90% subsidy under PM-KUSUM scheme",
-      "Smart street lights with auto operation"
-    ],
-    stats: ["Off-Grid Ready", "90% Subsidy", "Remote Areas", "5+ Years Life"],
-    capacity: "1-25 HP pumps",
-    roi: "Immediate savings",
-    gradient: "from-amber-300 via-orange-400 to-yellow-500",
-    icon: <Zap className="h-6 w-6" />,
-    image: "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=800&auto=format&fit=crop"
-  }
+const FALLBACK_SERVICES = [
+  { id: "residential", idKey: "residential", title: "Residential Rooftop Solar", description: "Transform your home into a clean energy powerhouse. Slash bills by up to 90%.", features: ["Custom-engineered designs", "Premium Tier-1 panels with 25+ year warranty", "Smart monitoring & full subsidy assistance"], stats: ["90% Bill Cut", "25+ Years", "Full Subsidy", "3-5 Year ROI"], capacity: "1kW to 10kW", roi: "20-25% returns", gradient: "from-orange-400 via-amber-400 to-yellow-400", icon: <Sun className="h-6 w-6" />, iconName: "Sun", image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&auto=format&fit=crop" },
+  { id: "commercial", idKey: "commercial", title: "Commercial & Industrial Solar", description: "Power your business sustainably. High-capacity systems with exceptional ROI and tax benefits.", features: ["10kW to 1MW+ systems for all businesses", "Flexible OPEX/CAPEX financing models", "Performance guarantees & tax benefits"], stats: ["70-100% Offset", "3-4 Year ROI", "Tax Benefits", "Zero Downtime"], capacity: "10kW to 1MW+", roi: "25-30% returns", gradient: "from-yellow-400 via-orange-400 to-amber-500", icon: <BarChart3 className="h-6 w-6" />, iconName: "BarChart3", image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&auto=format&fit=crop" },
+  { id: "infrastructure", idKey: "infrastructure", title: "Solar Pumps & Street Lights", description: "Off-grid solutions for agriculture and public safety with up to 90% subsidy support.", features: ["Solar pumps (1-25 HP) for farming", "90% subsidy under PM-KUSUM scheme", "Smart street lights with auto operation"], stats: ["Off-Grid Ready", "90% Subsidy", "Remote Areas", "5+ Years Life"], capacity: "1-25 HP pumps", roi: "Immediate savings", gradient: "from-amber-300 via-orange-400 to-yellow-500", icon: <Zap className="h-6 w-6" />, iconName: "Zap", image: "https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=800&auto=format&fit=crop" },
 ];
 
-const scopeOfWork = [
-  { 
-    phase: "Technical Selection & Design", 
-    icon: <LayoutPanelTop className="h-6 w-6" />, 
-    content: "Comprehensive technical selection and system design with premium Tier-1 solar panels from globally recognized manufacturers.",
-    details: ["PVsyst simulation", "3D roof modeling", "Load calculations", "Energy forecasting"],
-    color: "orange",
-    image: "https://images.unsplash.com/photo-1581094271901-8022df4466f9?w=600&auto=format&fit=crop"
-  },
-  { 
-    phase: "Government Liaison & Approvals", 
-    icon: <FileText className="h-6 w-6" />, 
-    content: "We handle all bureaucratic complexities including subsidy applications under PM Surya Ghar Muft Bijli Yojana.",
-    details: ["PM Surya Ghar subsidy", "PM-KUSUM facilitation", "Net metering", "DISCOM coordination"],
-    color: "amber",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&auto=format&fit=crop"
-  },
-  { 
-    phase: "Procurement & Logistics", 
-    icon: <Truck className="h-6 w-6" />, 
-    content: "Strong partnerships with leading manufacturers ensure competitive prices without compromising quality.",
-    details: ["Manufacturer partnerships", "Quality inspection", "BIS & MNRE compliance", "Material traceability"],
-    color: "yellow",
-    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop"
-  },
-  { 
-    phase: "Professional Installation", 
-    icon: <HardHat className="h-6 w-6" />, 
-    content: "MNRE-certified technicians and electrical engineers execute installation with top priority on safety.",
-    details: ["MNRE-certified team", "Safety protocols", "IS 3043 earthing", "Grid synchronization"],
-    color: "orange",
-    image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&auto=format&fit=crop"
-  },
-  { 
-    phase: "After-Sales Support", 
-    icon: <ShieldCheck className="h-6 w-6" />, 
-    content: "Committed to your system's optimal performance for decades with 24/7 monitoring and support.",
-    details: ["24/7 cloud monitoring", "Automatic alerts", "Bi-annual maintenance", "48-hour response"],
-    color: "amber",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop"
-  },
+const FALLBACK_SCOPE = [
+  { phase: "Technical Selection & Design", icon: <LayoutPanelTop className="h-6 w-6" />, iconName: "LayoutPanelTop", content: "Comprehensive technical selection and system design with premium Tier-1 solar panels from globally recognized manufacturers.", details: ["PVsyst simulation", "3D roof modeling", "Load calculations", "Energy forecasting"], color: "orange", image: "https://images.unsplash.com/photo-1581094271901-8022df4466f9?w=600&auto=format&fit=crop" },
+  { phase: "Government Liaison & Approvals", icon: <FileText className="h-6 w-6" />, iconName: "FileText", content: "We handle all bureaucratic complexities including subsidy applications under PM Surya Ghar Muft Bijli Yojana.", details: ["PM Surya Ghar subsidy", "PM-KUSUM facilitation", "Net metering", "DISCOM coordination"], color: "amber", image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&auto=format&fit=crop" },
+  { phase: "Procurement & Logistics", icon: <Truck className="h-6 w-6" />, iconName: "Truck", content: "Strong partnerships with leading manufacturers ensure competitive prices without compromising quality.", details: ["Manufacturer partnerships", "Quality inspection", "BIS & MNRE compliance", "Material traceability"], color: "yellow", image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop" },
+  { phase: "Professional Installation", icon: <HardHat className="h-6 w-6" />, iconName: "HardHat", content: "MNRE-certified technicians and electrical engineers execute installation with top priority on safety.", details: ["MNRE-certified team", "Safety protocols", "IS 3043 earthing", "Grid synchronization"], color: "orange", image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&auto=format&fit=crop" },
+  { phase: "After-Sales Support", icon: <ShieldCheck className="h-6 w-6" />, iconName: "ShieldCheck", content: "Committed to your system's optimal performance for decades with 24/7 monitoring and support.", details: ["24/7 cloud monitoring", "Automatic alerts", "Bi-annual maintenance", "48-hour response"], color: "amber", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop" },
 ];
 
-const executionProcess = [
-  { 
-    name: "Site Assessment", 
-    description: "Detailed on-site surveys to evaluate roof structure, orientation, and electrical infrastructure.", 
-    icon: <Sun className="h-6 w-6" />,
-    duration: "1-2 days",
-    color: "from-orange-400 to-amber-500"
-  },
-  { 
-    name: "Feasibility Study", 
-    description: "Comprehensive technical and financial reports with solar irradiation analysis and ROI calculations.", 
-    icon: <TrendingUp className="h-6 w-6" />,
-    duration: "3-5 days",
-    color: "from-amber-400 to-yellow-500"
-  },
-  { 
-    name: "Engineering & Design", 
-    description: "Detailed technical plans with diagrams, layouts, 3D visualizations, and complete documentation.", 
-    icon: <LayoutPanelTop className="h-6 w-6" />,
-    duration: "1 week",
-    color: "from-yellow-400 to-orange-500"
-  },
-  { 
-    name: "Procurement", 
-    description: "Sourcing equipment through verified vendors with proper certifications and quality checks.", 
-    icon: <Truck className="h-6 w-6" />,
-    duration: "1-2 weeks",
-    color: "from-orange-400 to-amber-400"
-  },
-  { 
-    name: "Installation", 
-    description: "MNRE-certified installers execute complete installation with comprehensive testing.", 
-    icon: <HardHat className="h-6 w-6" />,
-    duration: "3-10 days",
-    color: "from-amber-400 to-orange-500"
-  },
-  { 
-    name: "Support & Maintenance", 
-    description: "Continuous support through cloud monitoring, preventive maintenance, and warranty management.", 
-    icon: <Zap className="h-6 w-6" />,
-    duration: "Lifetime",
-    color: "from-yellow-400 to-amber-500"
-  },
+const FALLBACK_EXECUTION = [
+  { name: "Site Assessment", description: "Detailed on-site surveys to evaluate roof structure, orientation, and electrical infrastructure.", icon: <Sun className="h-6 w-6" />, iconName: "Sun", duration: "1-2 days", color: "from-orange-400 to-amber-500" },
+  { name: "Feasibility Study", description: "Comprehensive technical and financial reports with solar irradiation analysis and ROI calculations.", icon: <TrendingUp className="h-6 w-6" />, iconName: "TrendingUp", duration: "3-5 days", color: "from-amber-400 to-yellow-500" },
+  { name: "Engineering & Design", description: "Detailed technical plans with diagrams, layouts, 3D visualizations, and complete documentation.", icon: <LayoutPanelTop className="h-6 w-6" />, iconName: "LayoutPanelTop", duration: "1 week", color: "from-yellow-400 to-orange-500" },
+  { name: "Procurement", description: "Sourcing equipment through verified vendors with proper certifications and quality checks.", icon: <Truck className="h-6 w-6" />, iconName: "Truck", duration: "1-2 weeks", color: "from-orange-400 to-amber-400" },
+  { name: "Installation", description: "MNRE-certified installers execute complete installation with comprehensive testing.", icon: <HardHat className="h-6 w-6" />, iconName: "HardHat", duration: "3-10 days", color: "from-amber-400 to-orange-500" },
+  { name: "Support & Maintenance", description: "Continuous support through cloud monitoring, preventive maintenance, and warranty management.", icon: <Zap className="h-6 w-6" />, iconName: "Zap", duration: "Lifetime", color: "from-yellow-400 to-amber-500" },
 ];
 
 const HERO_SLIDER_IMAGES = [
@@ -149,6 +35,31 @@ const HERO_SLIDER_IMAGES = [
 ];
 
 export default function ServicesPage() {
+  const servicesFromDb = useServices();
+  const scopeFromDb = useScopeOfWork();
+  const executionFromDb = useExecutionProcess();
+
+  const services = useMemo(() => {
+    if (servicesFromDb.data?.length) {
+      return servicesFromDb.data.map((s) => ({ ...s, icon: getIcon(s.iconName, 'h-6 w-6') }));
+    }
+    return FALLBACK_SERVICES;
+  }, [servicesFromDb.data]);
+
+  const scopeOfWork = useMemo(() => {
+    if (scopeFromDb.data?.length) {
+      return scopeFromDb.data.map((s) => ({ ...s, icon: getIcon(s.iconName, 'h-6 w-6') }));
+    }
+    return FALLBACK_SCOPE;
+  }, [scopeFromDb.data]);
+
+  const executionProcess = useMemo(() => {
+    if (executionFromDb.data?.length) {
+      return executionFromDb.data.map((s) => ({ ...s, icon: getIcon(s.iconName, 'h-6 w-6') }));
+    }
+    return FALLBACK_EXECUTION;
+  }, [executionFromDb.data]);
+
   const [expandedScope, setExpandedScope] = useState(0);
   const [hoveredService, setHoveredService] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });

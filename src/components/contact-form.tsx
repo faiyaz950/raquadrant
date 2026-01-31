@@ -1,8 +1,9 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
-import { useEffect, useRef, useState } from "react";
-import { handleContactForm, type FormState } from "@/app/actions";
+import { useRef, useState } from "react";
+import { handleContactForm, contactSchema, type FormState } from "@/app/actions";
+import { getFirebaseClient } from "@/lib/firebase";
+import { addDocument, COLLECTIONS } from "@/lib/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,8 +15,7 @@ const initialState: FormState = {
   message: "",
 };
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
+function SubmitButton({ pending }: { pending: boolean }) {
   return (
     <Button 
       type="submit" 
@@ -45,27 +45,54 @@ function SubmitButton() {
 }
 
 export function ContactForm() {
-  const [state, formAction] = useFormState(handleContactForm, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const [errors, setErrors] = useState<FormState["errors"]>(undefined);
+  const [fields, setFields] = useState<FormState["fields"]>(undefined);
 
-  useEffect(() => {
-    if (state.message) {
-      if (state.errors) {
-        // Errors are displayed below fields
-      } else {
-        toast({
-          title: "Success! 🎉",
-          description: state.message,
-        });
-        formRef.current?.reset();
-      }
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = formRef.current;
+    if (!form) return;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData) as Record<string, string>;
+    const parsed = contactSchema.safeParse(data);
+    if (!parsed.success) {
+      setErrors(parsed.error.flatten().fieldErrors);
+      setFields(data);
+      return;
     }
-  }, [state, toast]);
-  
+    setErrors(undefined);
+    setPending(true);
+    try {
+      const fb = getFirebaseClient();
+      if (fb?.db) {
+        await addDocument(COLLECTIONS.CONTACT_SUBMISSIONS, {
+          ...parsed.data,
+          createdAt: new Date().toISOString(),
+        });
+        toast({ title: "Success! 🎉", description: "Thank you for your inquiry! We will get back to you shortly." });
+        form.reset();
+      } else {
+        const result = await handleContactForm(initialState, formData);
+        setFields(result.fields);
+        setErrors(result.errors);
+        if (!result.errors) {
+          toast({ title: "Success! 🎉", description: result.message });
+          form.reset();
+        }
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
-    <form ref={formRef} action={formAction} className="space-y-7">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-7">
       {/* Full Name Field */}
       <div className="group relative space-y-3">
         <Label 
@@ -87,7 +114,7 @@ export function ContactForm() {
             name="name" 
             placeholder="Enter your full name" 
             required 
-            defaultValue={state.fields?.name} 
+            defaultValue={fields?.name} 
             onFocus={() => setFocusedField('name')}
             onBlur={() => setFocusedField(null)}
             className="h-14 rounded-xl border-2 border-orange-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-400/20 hover:border-orange-300"
@@ -96,10 +123,10 @@ export function ContactForm() {
             focusedField === 'name' ? 'text-orange-500' : 'text-gray-400'
           }`} />
         </div>
-        {state.errors?.name && (
+        {errors?.name && (
           <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
-            {state.errors.name[0]}
+            {errors.name[0]}
           </p>
         )}
       </div>
@@ -128,7 +155,7 @@ export function ContactForm() {
               type="email" 
               placeholder="your.email@example.com" 
               required 
-              defaultValue={state.fields?.email}
+              defaultValue={fields?.email}
               onFocus={() => setFocusedField('email')}
               onBlur={() => setFocusedField(null)}
               className="h-14 rounded-xl border-2 border-amber-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-400/20 hover:border-amber-300"
@@ -137,10 +164,10 @@ export function ContactForm() {
               focusedField === 'email' ? 'text-amber-500' : 'text-gray-400'
             }`} />
           </div>
-          {state.errors?.email && (
+          {errors?.email && (
             <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
-              {state.errors.email[0]}
+              {errors.email[0]}
             </p>
           )}
         </div>
@@ -167,7 +194,7 @@ export function ContactForm() {
               name="phone" 
               type="tel" 
               placeholder="+91 12345-67890" 
-              defaultValue={state.fields?.phone}
+              defaultValue={fields?.phone}
               onFocus={() => setFocusedField('phone')}
               onBlur={() => setFocusedField(null)}
               className="h-14 rounded-xl border-2 border-yellow-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-yellow-400 focus:bg-white focus:ring-4 focus:ring-yellow-400/20 hover:border-yellow-300"
@@ -176,10 +203,10 @@ export function ContactForm() {
               focusedField === 'phone' ? 'text-yellow-500' : 'text-gray-400'
             }`} />
           </div>
-          {state.errors?.phone && (
+          {errors?.phone && (
             <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
-              {state.errors.phone[0]}
+              {errors.phone[0]}
             </p>
           )}
         </div>
@@ -206,7 +233,7 @@ export function ContactForm() {
             name="subject" 
             placeholder="What can we help you with?" 
             required 
-            defaultValue={state.fields?.subject}
+            defaultValue={fields?.subject}
             onFocus={() => setFocusedField('subject')}
             onBlur={() => setFocusedField(null)}
             className="h-14 rounded-xl border-2 border-orange-200/60 bg-white/80 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-400/20 hover:border-orange-300"
@@ -215,10 +242,10 @@ export function ContactForm() {
             focusedField === 'subject' ? 'text-orange-500' : 'text-gray-400'
           }`} />
         </div>
-        {state.errors?.subject && (
+        {errors?.subject && (
           <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
-            {state.errors.subject[0]}
+            {errors.subject[0]}
           </p>
         )}
       </div>
@@ -245,7 +272,7 @@ export function ContactForm() {
             placeholder="Tell us more about your solar energy needs, project requirements, or any questions you have..." 
             className="min-h-[160px] rounded-xl border-2 border-amber-200/60 bg-white/80 p-4 pl-12 font-medium text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-400/20 hover:border-amber-300 resize-none"
             required 
-            defaultValue={state.fields?.message}
+            defaultValue={fields?.message}
             onFocus={() => setFocusedField('message')}
             onBlur={() => setFocusedField(null)}
           />
@@ -253,10 +280,10 @@ export function ContactForm() {
             focusedField === 'message' ? 'text-amber-500' : 'text-gray-400'
           }`} />
         </div>
-        {state.errors?.message && (
+        {errors?.message && (
           <p className="flex items-center gap-2 text-sm font-medium text-red-600 animate-shake">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-100">!</span>
-            {state.errors.message[0]}
+            {errors.message[0]}
           </p>
         )}
       </div>
@@ -273,15 +300,15 @@ export function ContactForm() {
 
       {/* Submit Button */}
       <div className="pt-2">
-        <SubmitButton />
+        <SubmitButton pending={pending} />
       </div>
 
       {/* Error Message */}
-      {state.errors && state.message && (
+      {errors && (
         <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 animate-shake">
           <div className="flex items-start gap-3">
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">!</span>
-            <p className="text-sm font-medium text-red-600">{state.message}</p>
+            <p className="text-sm font-medium text-red-600">Please fix the errors above.</p>
           </div>
         </div>
       )}

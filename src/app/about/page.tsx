@@ -23,8 +23,10 @@ import {
   Star,
   Compass,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { useAboutStats, useWhatSetsApart, useLeadership } from "@/hooks/use-site-content";
+import { getIconComponent } from "@/lib/icon-map";
 
 const aboutHeroImage = PlaceHolderImages.find((img) => img.id === "about-hero");
 const heroImages = [
@@ -33,69 +35,57 @@ const heroImages = [
   PlaceHolderImages.find((img) => img.id === "service-commercial"),
 ].filter(Boolean);
 
-// Replace these with your leadership team photos when ready
 const LEADER_IMAGES = {
-  rizul:
-    "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&h=600&fit=crop",
-  shyam:
-    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&h=600&fit=crop",
+  rizul: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&h=600&fit=crop",
+  shyam: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&h=600&fit=crop",
 };
 
-const stats = [
+const FALLBACK_STATS = [
   { icon: Award, value: "500+", label: "Projects Completed" },
   { icon: Users, value: "10,000+", label: "Happy Customers" },
   { icon: Zap, value: "50MW+", label: "Solar Capacity" },
   { icon: TrendingUp, value: "98%", label: "Customer Satisfaction" },
 ];
 
-const whatSetsUsApart = [
-  {
-    icon: Wrench,
-    title: "Engineering-First Approach",
-    description:
-      "Every system is designed based on real load behaviour, grid conditions, and long-term performance—not assumptions.",
-  },
-  {
-    icon: Factory,
-    title: "MSME-Focused Solutions",
-    description:
-      "We understand cash flows, operating hours, and business realities of Indian MSMEs.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Execution with Integrity",
-    description:
-      "No inflated projections. No silent compromises. Only what can be engineered and delivered.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Long-Term Commitment",
-    description:
-      "We stay engaged beyond commissioning, ensuring systems perform as promised over their lifecycle.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Proven Ground Reality",
-    description: "Our projects speak louder than presentations.",
-  },
+const FALLBACK_SETS_APART = [
+  { icon: Wrench, title: "Engineering-First Approach", description: "Every system is designed based on real load behaviour, grid conditions, and long-term performance—not assumptions." },
+  { icon: Factory, title: "MSME-Focused Solutions", description: "We understand cash flows, operating hours, and business realities of Indian MSMEs." },
+  { icon: ShieldCheck, title: "Execution with Integrity", description: "No inflated projections. No silent compromises. Only what can be engineered and delivered." },
+  { icon: HeartHandshake, title: "Long-Term Commitment", description: "We stay engaged beyond commissioning, ensuring systems perform as promised over their lifecycle." },
+  { icon: CheckCircle2, title: "Proven Ground Reality", description: "Our projects speak louder than presentations." },
 ];
 
-const leadership = [
-  {
-    name: "Rizul Choudhury",
-    role: "Founder and CEO",
-    image: LEADER_IMAGES.rizul,
-    bio: "Over 18 years of leadership experience across energy, technology, and large-scale consumer businesses. He holds an MBA, along with a B.Sc. in Information Technology and Software Engineering, combining strategic thinking with strong technical and systems understanding. His professional journey includes leadership roles with globally respected organisations such as Samsung, Reliance Retail, Huawei Telecommunications, Future Group, Surya Business, Anvil Energy, and Husk Power Systems. Rizul has worked extensively on rural clean-energy transition and energy-access initiatives across Bihar, Uttar Pradesh, Assam, the North East, and West Bengal, focusing on MSMEs, agro-based industries, and underserved communities. A strong advocate for climate action and inclusive growth, he has led initiatives aligned with the UN Sustainable Development Goals, particularly SDG 7 (Affordable & Clean Energy) and SDG 13 (Climate Action).",
-  },
-  {
-    name: "Shyam Chakraborty",
-    role: "Co-Founder and COO",
-    image: LEADER_IMAGES.shyam,
-    bio: "Over 14 years of deep, hands-on experience in rooftop and utility-scale solar projects. He leads operations, project management, engineering, and execution, ensuring every project is delivered with precision, safety, and long-term reliability. His expertise covers techno-commercial evaluation, project costing, system design (grid-connected and battery-based), risk management, and end-to-end project delivery—from site surveys and engineering validation to commissioning and O&M handover. An alumnus of XLRI Jamshedpur's Executive Program in Project Management, Shyam has worked with industry leaders including Areva T&D, Schneider Electric, Atha Group, Onergy Solar, Husk Power, and Anvil Cables & Energy. Known for his structured problem-solving approach and adherence to Total Quality Management (TQM) principles.",
-  },
+const FALLBACK_LEADERSHIP = [
+  { name: "Rizul Choudhury", role: "Founder and CEO", image: LEADER_IMAGES.rizul, bio: "Over 18 years of leadership experience across energy, technology, and large-scale consumer businesses. He holds an MBA, along with a B.Sc. in Information Technology and Software Engineering, combining strategic thinking with strong technical and systems understanding. His professional journey includes leadership roles with globally respected organisations such as Samsung, Reliance Retail, Huawei Telecommunications, Future Group, Surya Business, Anvil Energy, and Husk Power Systems. Rizul has worked extensively on rural clean-energy transition and energy-access initiatives across Bihar, Uttar Pradesh, Assam, the North East, and West Bengal, focusing on MSMEs, agro-based industries, and underserved communities. A strong advocate for climate action and inclusive growth, he has led initiatives aligned with the UN Sustainable Development Goals, particularly SDG 7 (Affordable & Clean Energy) and SDG 13 (Climate Action)." },
+  { name: "Shyam Chakraborty", role: "Co-Founder and COO", image: LEADER_IMAGES.shyam, bio: "Over 14 years of deep, hands-on experience in rooftop and utility-scale solar projects. He leads operations, project management, engineering, and execution, ensuring every project is delivered with precision, safety, and long-term reliability. His expertise covers techno-commercial evaluation, project costing, system design (grid-connected and battery-based), risk management, and end-to-end project delivery—from site surveys and engineering validation to commissioning and O&M handover. An alumnus of XLRI Jamshedpur's Executive Program in Project Management, Shyam has worked with industry leaders including Areva T&D, Schneider Electric, Atha Group, Onergy Solar, Husk Power, and Anvil Cables & Energy. Known for his structured problem-solving approach and adherence to Total Quality Management (TQM) principles." },
 ];
+
+function parseStatValue(v: string): number {
+  const n = parseInt(v.replace(/\D/g, ""), 10);
+  return isNaN(n) ? 0 : n;
+}
 
 export default function AboutPage() {
+  const statsFromDb = useAboutStats();
+  const setsApartFromDb = useWhatSetsApart();
+  const leadershipFromDb = useLeadership();
+
+  const stats = useMemo(() => {
+    if (statsFromDb.data?.length) {
+      return statsFromDb.data.map((s) => ({ ...s, icon: getIconComponent(s.iconName) }));
+    }
+    return FALLBACK_STATS;
+  }, [statsFromDb.data]);
+
+  const whatSetsUsApart = useMemo(() => {
+    if (setsApartFromDb.data?.length) {
+      return setsApartFromDb.data.map((s) => ({ ...s, icon: getIconComponent(s.iconName) }));
+    }
+    return FALLBACK_SETS_APART;
+  }, [setsApartFromDb.data]);
+
+  const leadership = useMemo(() => (leadershipFromDb.data?.length ? leadershipFromDb.data : FALLBACK_LEADERSHIP), [leadershipFromDb.data]);
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -128,7 +118,8 @@ export default function AboutPage() {
   // Animated counter for stats
   useEffect(() => {
     if (statsReveal.isInView) {
-      const targets = [500, 10000, 50, 98];
+      const targets = stats.slice(0, 4).map((s) => parseStatValue(typeof s.value === "string" ? s.value : "0"));
+      if (targets.length < 4) targets.push(500, 10000, 50, 98);
       const duration = 2000;
       const steps = 60;
       const stepDuration = duration / steps;
