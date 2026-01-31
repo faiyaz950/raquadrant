@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Award, Building2, CheckSquare, BrainCircuit, Globe, Handshake, HomeIcon, Lightbulb, Droplets, ShieldCheck, Users, Zap, Sun, Leaf, Battery, TrendingUp, Star, ChevronRight, ChevronLeft, Play, Sparkles, CircleDot } from 'lucide-react';
+import { ArrowRight, Award, Building2, CheckSquare, BrainCircuit, Globe, Handshake, HomeIcon, Lightbulb, Droplets, ShieldCheck, Users, Zap, Sun, Leaf, Battery, TrendingUp, Star, ChevronRight, ChevronLeft, Play, Sparkles, CircleDot, Quote } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useState, useEffect, useRef } from 'react';
 
@@ -74,6 +74,30 @@ const introPoints = [
       paragraph: "From day-one handover to annual maintenance and fault resolution, we stay with you. Real-time monitoring, preventive visits, and a single point of contact for any issue.",
       image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&auto=format&fit=crop",
     },
+];
+
+const testimonials = [
+  {
+    quote: "RaQuadrant delivered our 150 kWp off-grid solar plant in Assam on time. Their engineering and execution were outstanding. We now run our unit entirely on solar with zero dependency on the grid.",
+    name: "Rajesh Kumar",
+    role: "Director, Agro-Processing Unit",
+    location: "Chapar, Dhubri (Assam)",
+    rating: 5,
+  },
+  {
+    quote: "From site survey to commissioning, the team was professional and transparent. Our rooftop system in Howrah has been performing beyond expectations. Highly recommend for commercial installations.",
+    name: "Priya Sharma",
+    role: "Operations Head",
+    location: "Howrah, West Bengal",
+    rating: 5,
+  },
+  {
+    quote: "We needed a reliable solar solution for our warehouse. RaQuadrant understood our load profile and designed a system that has cut our electricity costs significantly. Trustworthy and quality-focused.",
+    name: "Amit Patel",
+    role: "Managing Partner",
+    location: "Kolkata",
+    rating: 5,
+  },
 ];
 
 const partners = [
@@ -149,6 +173,7 @@ export default function HomePage() {
   const servicesReveal = useScrollReveal(0.06);
   const featuredReveal = useScrollReveal(0.06);
   const differenceReveal = useScrollReveal(0.06);
+  const testimonialsReveal = useScrollReveal(0.06);
   const ctaReveal = useScrollReveal(0.06);
 
   useEffect(() => {
@@ -1132,6 +1157,61 @@ export default function HomePage() {
                     
                     {/* Bottom Line Indicator */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-amber-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-b-2xl" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" ref={testimonialsReveal.ref} className={`py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden scroll-reveal ${testimonialsReveal.isInView ? 'in-view' : ''}`}>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-orange-50 rounded-full blur-3xl opacity-60" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-50 rounded-full blur-3xl opacity-50" />
+        
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-6xl">
+          <div className="text-center mb-10 sm:mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2 bg-gradient-to-r from-orange-50 to-amber-50 rounded-full mb-4 sm:mb-5 border border-orange-200 shadow-md hover:shadow-lg transition-shadow">
+              <Quote className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+              <span className="text-xs sm:text-sm font-bold text-orange-600">Testimonials</span>
+            </div>
+            
+            <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-black mb-4 sm:mb-5">
+              <span className="font-headline text-gray-900">What our clients</span>
+              <span className="font-headline text-gradient animate-gradient"> say</span>
+            </h2>
+            
+            <div className="relative w-24 sm:w-32 h-1.5 sm:h-2 mx-auto rounded-full mb-3 sm:mb-4 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400" />
+            </div>
+            <p className="text-base sm:text-lg text-gray-600">Real stories from businesses we&apos;ve powered</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+            {testimonials.map((item, index) => (
+              <div
+                key={item.name}
+                className="group animate-slideInUp hover-lift"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="h-full flex flex-col p-5 sm:p-6 lg:p-7 bg-white rounded-2xl sm:rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-orange-100 card-shine relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(item.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  
+                  <blockquote className="text-sm sm:text-base text-gray-700 leading-relaxed mb-5 sm:mb-6 flex-1 italic">
+                    &ldquo;{item.quote}&rdquo;
+                  </blockquote>
+                  
+                  <div className="pt-4 border-t border-orange-100">
+                    <p className="font-headline font-bold text-gray-900 text-base sm:text-lg">{item.name}</p>
+                    <p className="text-orange-600 font-semibold text-xs sm:text-sm">{item.role}</p>
+                    <p className="text-gray-500 text-xs sm:text-sm mt-0.5">{item.location}</p>
                   </div>
                 </div>
               </div>
